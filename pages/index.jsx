@@ -1,5 +1,9 @@
 import Typography from '@mui/joy/Typography';
 
+/**
+ * ! THIS PROJECT DOESN'T SUPPORT THESE CONCEPTS ATM:
+ * 		! POLYGAMY 👀
+*/
 
 Home.title = 'Home';
 export default function Home() {
