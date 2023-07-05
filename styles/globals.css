@@ -1,5 +1,26 @@
 html,
 body {
-	max-width: 100vw;
-	overflow-x: hidden;
+	height: 100%;
+	/* --font-family: Quicksand; */
+    /* font-family: Quicksand, var(--font-family); */
+	/* min-height: 100%; */
+	/* max-width: 100vw; */
+	/* overflow-x: hidden; */
+}
+
+body .p-component {
+    font-family: Quicksand, var(--font-family);
+	font-weight: 600;
+}
+
+#__next {
+	height: 100%;
+}
+
+.rd3t-tree-container {
+	/* display: flex; */
+}
+
+a {
+	text-decoration: none;
 }
