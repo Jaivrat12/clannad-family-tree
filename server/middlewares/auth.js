@@ -8,6 +8,8 @@ const isAuth = async (req, res, next) => {
 
     try {
         const { AUTH_TOKEN_KEY, AUTH_SECRET_KEY } = process.env;
+        console.log(req.cookies);
+        console.log();
         console.log(req.cookies[AUTH_TOKEN_KEY]);
         console.log();
         const decoded = await decode({
