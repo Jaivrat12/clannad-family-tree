@@ -13,7 +13,7 @@ const apiRoutes = require('./routes');
 const { isAuth } = require('./middlewares/auth');
 
 const {
-    ORIGIN,
+    // ORIGIN,
     CLOUDINARY_CLOUD_NAME,
     CLOUDINARY_API_KEY,
     CLOUDINARY_API_SECRET,
@@ -21,7 +21,8 @@ const {
 
 const app = express();
 app.use(cors({
-    origin: ORIGIN,
+    origin: '*',
+    // origin: ORIGIN,
     credentials: true,
 }));
 app.use(express.json());

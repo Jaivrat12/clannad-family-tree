@@ -226,7 +226,7 @@ export default function Home() {
 								src={
 									workspace.image
 									?? workspace.families[0]?.root?.image
-									?? '/members/images/default-female.jpg'
+									?? '/static/images/default-workspace.jpg'
 								}
 								alt=""
 								width={ 90 }
