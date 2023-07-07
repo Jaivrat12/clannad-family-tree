@@ -7,10 +7,15 @@ const { decode } = require('next-auth/jwt');
 const isAuth = async (req, res, next) => {
 
     try {
+        console.log(req.cookies['next-auth.session-token']);
+        console.log();
         const decoded = await decode({
             token: req.cookies['next-auth.session-token'],
             secret: 'lols',
         });
+        console.log(decoded);
+        console.log();
+        console.log();
 
         if (decoded === null) {
             throw new Error();
