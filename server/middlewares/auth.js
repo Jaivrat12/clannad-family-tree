@@ -8,17 +8,10 @@ const isAuth = async (req, res, next) => {
 
     try {
         const { AUTH_TOKEN_KEY, AUTH_SECRET_KEY } = process.env;
-        console.log(req.cookies);
-        console.log();
-        console.log(req.cookies[AUTH_TOKEN_KEY]);
-        console.log();
         const decoded = await decode({
             token: req.cookies[AUTH_TOKEN_KEY],
             secret: AUTH_SECRET_KEY,
         });
-        console.log(decoded);
-        console.log();
-        console.log();
 
         if (decoded === null) {
             throw new Error();
