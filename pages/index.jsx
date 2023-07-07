@@ -37,7 +37,7 @@ export default function Home() {
 	const { data: session } = useSession();
 	const router = useRouter();
 
-	const { data } = useGetWorkspacesQuery();
+	const { data, isLoading, isFetching, isSuccess, isError } = useGetWorkspacesQuery();
 	const [workspaces, setWorkspaces] = useState([]);
 	const [workspace, setWorkspace] = useState(null);
 
@@ -311,14 +311,20 @@ export default function Home() {
 						textAlign="center"
 						marginTop={4}
 					>
-						You don&apos;t have any Workspaces. Make one using the Create Button!
-						<br />
-						<br />
-						A Workspace is a collection of families,
-						e.g. your father&apos;s family and your mother&apos;s family
-						are separate and have their own family trees their own parents, etc.
-						There can be many such families which you can keep in here together
-						so that everything related to your main family is kept in one <b>Workspace</b>.
+						{ !data || isLoading || isFetching ? 'Loading...'
+						: isError ? 'Something wen\'t wrong...' : isSuccess && (
+
+							<>
+								You don&apos;t have any Workspaces. Make one using the Create Button!
+								<br />
+								<br />
+								A Workspace is a collection of families,
+								e.g. your father&apos;s family and your mother&apos;s family
+								are separate and have their own family trees their own parents, etc.
+								There can be many such families which you can keep in here together
+								so that everything related to your main family is kept in one <b>Workspace</b>.
+							</>
+						)}
 					</Typography>
 				)}
 			</Box>
