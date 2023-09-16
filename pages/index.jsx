@@ -11,13 +11,13 @@ import Button from '@mui/joy/Button';
 import Card from '@mui/joy/Card';
 import Chip from '@mui/joy/Chip';
 import Typography from '@mui/joy/Typography';
-import { Add, Edit, ExitToApp } from '@mui/icons-material';
+import { Add, Delete, Edit, ExitToApp } from '@mui/icons-material';
 import MuiModal from 'components/Common/MuiModal';
 import WorkspaceForm from 'components/Workspace/WorkspaceForm';
 import Workspace from 'components/Workspace';
 import {
 	useCreateWorkspaceMutation,
-	// useDelteWorkspaceMutation,
+	useDeleteWorkspaceMutation,
 	useGetWorkspacesQuery,
 	useUpdateWorkspaceMutation,
 } from 'services/workspace';
@@ -81,7 +81,14 @@ export default function Home() {
 		}
     };
 
-	// const [deleteWorkspace, { isLoading }] = useDelteWorkspaceMutation();
+	const [deleteWorkspace, { isDeleteWorkspaceLoading }] = useDeleteWorkspaceMutation();
+    const handledelete = async (id) => {
+
+        const result = await deleteWorkspace(id);
+		if (result.data.success) {
+			// TODO: alert success
+		}
+    };
 
 	useEffect(() => {
 		data && setWorkspaces(data.workspaces);
@@ -252,14 +259,13 @@ export default function Home() {
 										<Edit />
 									</IconButton>
 
-									{/* <Button
-										size="small"
-										severity="danger"
-										icon={ PrimeIcons.TRASH }
-										onClick={ () => delteWorkspace(workspace._id) }
-										className="py-1"
-										disabled={ isLoading }
-									/> */}
+									<IconButton
+										size="sm"
+										color="danger"
+										onClick={() => handledelete(workspace._id)}
+									>
+										<Delete />
+									</IconButton>
 								</div>
 							</div>
 

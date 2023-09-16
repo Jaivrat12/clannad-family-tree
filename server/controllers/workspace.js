@@ -72,17 +72,26 @@ const updateWorkspace = async (req, res) => {
     }
 };
 
-// TODO: delete families, members, and nuclearFamilies
 const deleteWorkspace = async (req, res) => {
 
     const { workspaceId } = req.params;
 
     try {
 
-        const [workspace] = await Promise.all([
-            Workspace.findByIdAndDelete(workspaceId),
+        const workspace = await Workspace.findById(workspaceId);
+
+        const deleteAllMembers = Member.deleteMany({ workspace: workspaceId });
+        const deleteAllNuclearFamilies = NuclearFamily.deleteMany({ workspace: workspaceId });
+        const deleteAllFamilies = Family.deleteMany({ _id: workspace.families });
+
+        await Promise.all([
+            deleteAllMembers,
+            deleteAllNuclearFamilies,
+            deleteAllFamilies,
             deleteImageFolder(workspaceId),
         ]);
+
+        await Workspace.findByIdAndDelete(workspaceId);
         res.status(200).json({ success: true, data: workspace });
     } catch (error) {
         res.status(400).json({ success: false, error });
@@ -178,6 +187,7 @@ const createMember = async (req, res) => {
         const nuclearFamily = new NuclearFamily({
             _id: new mongoose.Types.ObjectId(),
             [member.gender]: member._id,
+            workspace: workspaceId,
         });
 
         member.nuclearFamily = nuclearFamily._id;

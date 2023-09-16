@@ -30,7 +30,7 @@ export const workspaceApi = createApi({
             }),
             invalidatesTags: ['Workspace'],
         }),
-        delteWorkspace: builder.mutation({
+        deleteWorkspace: builder.mutation({
             query: (id) => ({
                 url: id,
                 method: 'DELETE',
@@ -82,7 +82,7 @@ export const {
     useGetWorkspacesQuery,
     useCreateWorkspaceMutation,
     useUpdateWorkspaceMutation,
-    useDelteWorkspaceMutation,
+    useDeleteWorkspaceMutation,
 
     useGetWorkspaceByFamilyIdQuery,
     useCreateFamilyMutation,

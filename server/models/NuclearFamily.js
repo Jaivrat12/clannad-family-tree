@@ -17,6 +17,11 @@ const NuclearFamilySchema = new mongoose.Schema({
 		ref: 'NuclearFamily',
 		default: [],
 	}],
+    workspace: {
+		type: Schema.Types.ObjectId,
+		ref: 'Workspace',
+        required: true,
+    },
 });
 
 module.exports = mongoose.model('NuclearFamily', NuclearFamilySchema);
