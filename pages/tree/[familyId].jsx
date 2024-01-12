@@ -4,18 +4,28 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSession } from 'next-auth/react';
-import { Box, Button, Typography } from '@mui/joy';
+import Box from '@mui/joy/Box';
+import Button from '@mui/joy/Button';
 import IconButton from '@mui/joy/IconButton';
-import Folder from '@mui/icons-material/Folder';
-import Home from '@mui/icons-material/Home';
-import Person from '@mui/icons-material/Person';
+import Typography from '@mui/joy/Typography';
+import { useColorScheme } from '@mui/joy/styles';
+import FolderICon from '@mui/icons-material/Folder';
+import HomeIcon from '@mui/icons-material/Home';
+import PersonIcon from '@mui/icons-material/Person';
 import MembersList from 'components/MembersList';
 import Node from 'components/Node';
 import Profile from 'components/Profile';
 import Workspace from 'components/Workspace';
+import ThemeToggleButton from 'components/Common/ThemeToggleButton';
 import { setFamilyData } from 'features/family/familySlice';
-import { useAddRootMutation, useGetFamilyByIdQuery } from 'services/family';
-import { useGetMembersByWorkspaceIdQuery, useGetWorkspaceByFamilyIdQuery } from 'services/workspace';
+import {
+	useAddRootMutation,
+	useGetFamilyByIdQuery,
+} from 'services/family';
+import {
+	useGetMembersByWorkspaceIdQuery,
+	useGetWorkspaceByFamilyIdQuery,
+} from 'services/workspace';
 import { denormalize } from 'utils';
 import useCenteredTree from 'utils/hooks/useCenteredTree';
 import settings from 'mocks/settings';
@@ -29,7 +39,7 @@ const renderNode = ({ nodeDatum, toggleNode }, onNodeClick) => {
 
 	return nodeDatum._id && (
 		<Node
-			id={ nodeDatum._id }
+			id={nodeDatum._id}
 			onClick={(id) => {
 				toggleNode();
 				onNodeClick(id)();
@@ -47,6 +57,9 @@ export default function FamilyTree() {
 	const { familyId } = router.query;
 	const dispatch = useDispatch();
 
+	const { mode } = useColorScheme();
+	const isDarkMode = mode === 'dark';
+
 	const {
 		data: familyData,
 		isFetching: isFamilyFetching,
@@ -56,21 +69,27 @@ export default function FamilyTree() {
 	});
 
 	const {
-		data: workspaceData,
-		// isFetching: isWorkspaceFetching,
-		// isLoading: isWorkspaceLoading,
+		data: workspaceData
 	} = useGetWorkspaceByFamilyIdQuery(familyId, {
 		skip: !familyId
 	});
 
-    const {
-        data: archived
-    } = useGetMembersByWorkspaceIdQuery({
+	const {
+		data: parentlessMembers
+	} = useGetMembersByWorkspaceIdQuery({
 		workspaceId: workspaceData?.workspaces?.[0]._id,
 		filters: { hasParent: false },
 	}, {
-        skip: !workspaceData || !!familyData?.data?.root,
-    });
+		skip: !workspaceData || isFamilyLoading || !!familyData?.data?.root,
+	});
+
+	const {
+		data: workspaceMembers
+	} = useGetMembersByWorkspaceIdQuery({
+		workspaceId: workspaceData?.workspaces?.[0]._id,
+	}, {
+		skip: !workspaceData,
+	});
 
 	const [rootListOpen, setRootListOpen] = useState(false);
 	const [addRoot] = useAddRootMutation();
@@ -86,12 +105,11 @@ export default function FamilyTree() {
 	}, [familyData, dispatch]);
 
 	const family = useSelector((state) => state.family);
-	// console.log('familyData:', family.data);
-	// console.log('familyTree:', family.tree);
 
-	const members = family.data.members
-		? denormalize(family.data.members)
-		: [];
+	const [showFamilyMembersOnly, setShowFamilyMembersOnly] = useState(true);
+	const members = showFamilyMembersOnly
+		? denormalize(family.data.members ?? [])
+		: workspaceMembers.members;
 
 	const [dimensions, translate, containerRef] = useCenteredTree();
 	const [changed, setChanged] = useState(true);
@@ -105,6 +123,23 @@ export default function FamilyTree() {
 		triggerCenterNode();
 		setMemberId(id);
 	};
+
+	useEffect(() => {
+
+		const preventCtrlWheelZoom = (e) => {
+			if (e.ctrlKey) {
+				e.preventDefault();
+			}
+		};
+
+		document.addEventListener(
+			'wheel',
+			preventCtrlWheelZoom,
+			{ passive: false },
+		);
+
+		return () => document.removeEventListener('wheel', preventCtrlWheelZoom, { passive: false });
+	}, []);
 
 	if (!session) {
 
@@ -129,13 +164,13 @@ export default function FamilyTree() {
 				}}
 			>
 				<Typography level="h3" gutterBottom>
-					{ isLoading
+					{isLoading
 						? 'Loading...'
 						: 'Family not found!'
 					}
 				</Typography>
 
-				{ !isLoading && (
+				{!isLoading && (
 					<Link href="/">
 						<Button>
 							Go Back to Home
@@ -148,126 +183,139 @@ export default function FamilyTree() {
 
 	return familyData && (
 
-		<div
-			ref={ containerRef }
-			style={{
+		<Box
+			ref={containerRef}
+			sx={{
 				width: '100%',
 				height: '100%',
 				overflow: 'hidden',
 			}}
 		>
+			<Box
+				sx={{
+					position: 'absolute',
+					inset: '1.5rem 1.5rem auto auto',
+				}}
+			>
+				<ThemeToggleButton />
+			</Box>
+
 			<Tree
-				data={ family.tree }
-				dimensions={ dimensions }
-				translate={ translate }
+				data={family.tree}
+				dimensions={dimensions}
+				translate={translate}
 				renderCustomNodeElement={(nodeProps) =>
 					renderNode(nodeProps, onNodeClick)
 				}
-				{ ...settings.treeProps }
+				pathClassFunc={() => isDarkMode && 'dark-tree-link-path'}
+				{...settings.treeProps}
 			/>
 
 			<Link href="/">
 				<IconButton
 					variant="solid"
+					color="primary"
 					sx={{
 						position: 'absolute',
 						inset: 'auto 1.5rem 7.5rem auto',
 					}}
 				>
-					<Home />
+					<HomeIcon />
 				</IconButton>
 			</Link>
 
-			{ !familyData?.data?.root && (
+			{!familyData?.data?.root && (
 
-				<div
-					style={{
+				<Box
+					sx={{
 						position: 'absolute',
 						top: '40%',
-                        left: 10,
-                        right: 10,
+						left: 10,
+						right: 10,
 						textAlign: 'center',
 					}}
 				>
 					<Typography
-                        level="h5"
-                        gutterBottom
+						level="h5"
+						gutterBottom
 						mb={2}
 					>
 						This family does not have a root member
 					</Typography>
 
-					<Button onClick={ () => setRootListOpen(true) }>
+					<Button onClick={() => setRootListOpen(true)}>
 						Add Root Member
 					</Button>
 
-					{ archived?.members && (
+					{parentlessMembers?.members && (
 
 						<MembersList
 							title="Select a Root Member..."
-							members={ archived?.members }
-							onClick={ (member) => addFamilyRoot(member._id) }
-							workspaceId={ workspaceData.workspaces[0]._id }
-							open={ rootListOpen }
-							onClose={ () => setRootListOpen(false) }
+							members={parentlessMembers?.members}
+							onClick={(member) => addFamilyRoot(member._id)}
+							workspaceId={workspaceData.workspaces[0]._id}
+							open={rootListOpen}
+							onClose={() => setRootListOpen(false)}
 						/>
 					)}
-				</div>
+				</Box>
 			)}
 
-			{ workspaceData && (
+			{workspaceData && (
 
 				<>
 					<IconButton
 						variant="solid"
-						onClick={ () => setMembersListOpen(true) }
+						color="primary"
+						onClick={() => setMembersListOpen(true)}
 						sx={{
 							position: 'absolute',
 							inset: 'auto 1.5rem 4.5rem auto',
-							// borderRadius: '50%',
 						}}
 					>
-						<Person />
+						<PersonIcon />
 					</IconButton>
 
 					<MembersList
-						title="Members in this Family..."
-						members={ members }
-						onClick={ (member) => setMemberId(member._id) }
-						workspaceId={ workspaceData.workspaces[0]._id }
-						open={ membersListOpen }
-						onClose={ () => setMembersListOpen(false) }
+						title={`${showFamilyMembersOnly ? 'Family' : 'Workspace'} Members (${members.length})`}
+						members={members}
+						onClick={(member) => setMemberId(member._id)}
+						workspaceId={workspaceData.workspaces[0]._id}
+						showFamilyMembersOnly={showFamilyMembersOnly}
+						setShowFamilyMembersOnly={setShowFamilyMembersOnly}
+						open={membersListOpen}
+						onClose={() => setMembersListOpen(false)}
 					/>
 
-					{ memberId && (
+					{memberId && (
 						<Profile
-							open={ true }
-							onClose={ () => setMemberId(null) }
-							memberId={ memberId }
-							setMemberId={ setMemberId }
-							workspaceId={ workspaceData.workspaces[0]._id }
+							open={true}
+							onClose={() => setMemberId(null)}
+							memberId={memberId}
+							setMemberId={setMemberId}
+							workspaceId={workspaceData.workspaces[0]._id}
 						/>
 					)}
 
 					<IconButton
 						variant="solid"
-						onClick={ () => setWorkspaceModalOpen(true) }
+						color="primary"
+						onClick={() => setWorkspaceModalOpen(true)}
 						sx={{
 							position: 'absolute',
 							inset: 'auto 1.5rem 1.5rem auto',
-							// borderRadius: '50%',
 						}}
 					>
-						<Folder />
+						<FolderICon />
 					</IconButton>
 
 					<Workspace
-						workspace={ workspaceData.workspaces[0] }
-						open={ workspaceModalOpen }
-						onClose={ () => setWorkspaceModalOpen(false) }
+						workspace={workspaceData.workspaces[0]}
+						open={workspaceModalOpen}
+						onClose={() => setWorkspaceModalOpen(false)}
 					/>
 				</>
 			)}
-		</div>
+		</Box>
 	);
 }

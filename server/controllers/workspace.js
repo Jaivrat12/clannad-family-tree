@@ -56,7 +56,7 @@ const updateWorkspace = async (req, res) => {
 
     try {
 
-        const workspace = await Workspace.findByIdAndUpdate(workspaceId, req.body);
+        const workspace = await Workspace.findByIdAndUpdate(workspaceId, req.body, { new: true });
 
         if (req.files?.image) {
             workspace.image = await uploadImage(req.files.image.tempFilePath, {
@@ -120,15 +120,13 @@ const createFamily = async (req, res) => {
 
 const removeFamily = async (req, res) => {
 
-    const { workspaceId, familyId } = req.params;
+    const { familyId } = req.params;
 
     try {
 
-        // const family = await Family.deleteOne({ _id: familyId });
-
-        const query = { _id: workspaceId };
+        const query = { families: familyId };
         const updates = {
-            families: { $pull: familyId }
+            $pull: { families: familyId }
         };
         const options = { new: true };
         const workspace = await Workspace.findOneAndUpdate(query, updates, options)
@@ -136,6 +134,8 @@ const removeFamily = async (req, res) => {
                 path: 'families',
                 populate: 'root',
             });
+
+        await Family.deleteOne({ _id: familyId });
         res.status(201).json({ success: true, workspace });
     } catch (error) {
         res.status(400).json({ success: false });

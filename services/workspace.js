@@ -58,6 +58,13 @@ export const workspaceApi = createApi({
             }),
             invalidatesTags: ['Family'],
         }),
+        deleteFamily: builder.mutation({
+            query: (id) => ({
+                url: `/family/${ id }`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: ['Family'],
+        }),
 
         createMember: builder.mutation({
             query: ({ workspaceId, member }) => ({
@@ -87,6 +94,7 @@ export const {
     useGetWorkspaceByFamilyIdQuery,
     useCreateFamilyMutation,
     useUpdateFamilyMutation,
+    useDeleteFamilyMutation,
 
     useCreateMemberMutation,
     useGetMembersByWorkspaceIdQuery,

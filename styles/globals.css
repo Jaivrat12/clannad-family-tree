@@ -2,15 +2,10 @@ html,
 body {
 	height: 100%;
 	/* --font-family: Quicksand; */
-    /* font-family: Quicksand, var(--font-family); */
+	/* font-family: Quicksand, var(--font-family); */
 	/* min-height: 100%; */
 	/* max-width: 100vw; */
 	/* overflow-x: hidden; */
-}
-
-body .p-component {
-    font-family: Quicksand, var(--font-family);
-	font-weight: 600;
 }
 
 #__next {
@@ -19,6 +14,10 @@ body .p-component {
 
 .rd3t-tree-container {
 	/* display: flex; */
+}
+
+.dark-tree-link-path {
+	stroke: #888 !important;
 }
 
 a {

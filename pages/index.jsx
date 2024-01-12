@@ -3,18 +3,25 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { Container, IconButton } from '@mui/joy';
 import AspectRatio from '@mui/joy/AspectRatio';
 import Avatar from '@mui/joy/Avatar';
 import Box from '@mui/joy/Box';
 import Button from '@mui/joy/Button';
 import Card from '@mui/joy/Card';
 import Chip from '@mui/joy/Chip';
+import Container from '@mui/joy/Container';
+import IconButton from '@mui/joy/IconButton';
+import Tooltip from '@mui/joy/Tooltip';
 import Typography from '@mui/joy/Typography';
-import { Add, Delete, Edit, ExitToApp } from '@mui/icons-material';
-import MuiModal from 'components/Common/MuiModal';
-import WorkspaceForm from 'components/Workspace/WorkspaceForm';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import Workspace from 'components/Workspace';
+import WorkspaceForm from 'components/Workspace/WorkspaceForm';
+import Alert from 'components/Common/Alert';
+import DeleteConfirmButton from 'components/Common/DeleteConfirmButton';
+import JoyModal from 'components/Common/JoyModal';
+import ThemeToggleButton from 'components/Common/ThemeToggleButton';
 import {
 	useCreateWorkspaceMutation,
 	useDeleteWorkspaceMutation,
@@ -61,40 +68,69 @@ export default function Home() {
 		setWorkspace(null);
 	};
 
-    const [createWorkspace] = useCreateWorkspaceMutation();
-    const handleCreate = async (workspace) => {
-        const result = await createWorkspace(workspace);
-		if (result.data.success) {
-			closeFormModal();
+	const [createWorkspace, {
+		data: createWorkspaceData,
+		error: createWorkspaceError,
+		isLoading: isCreatingWorkspace,
+	}] = useCreateWorkspaceMutation();
+	const handleCreate = async (workspace) => {
+		const result = await createWorkspace(workspace);
+		try {
+			if (result.data.success) {
+				closeFormModal();
+			}
+		} catch (error) {
+			// ! couldn't connect to net/server
+			console.log(error);
+			console.log(createWorkspaceError);
 		}
-    };
+	};
 
-	const [updateWorkspace] =  useUpdateWorkspaceMutation();
-    const handleUpdate = async (updates) => {
+	const [updateWorkspace, {
+		data: updateWorkspaceData,
+		error: updateWorkspaceError,
+		isLoading: isUpdatingWorkspace,
+	}] = useUpdateWorkspaceMutation();
+	const handleUpdate = async (updates) => {
 
-        const result = await updateWorkspace({
+		const result = await updateWorkspace({
 			id: workspace._id,
 			updates,
 		});
-		if (result.data.success) {
-			closeFormModal();
+		try {
+			if (result.data.success) {
+				closeFormModal();
+			}
+		} catch (error) {
+			// ! couldn't connect to net/server
+			console.log(error);
+			console.log(updateWorkspaceError);
 		}
-    };
+	};
 
-	const [deleteWorkspace, { isDeleteWorkspaceLoading }] = useDeleteWorkspaceMutation();
-    const handledelete = async (id) => {
+	const [deleteWorkspace, {
+		data: deleteWorkspaceData,
+		error: deleteWorkspaceError,
+		isLoading: isDeletingWorkspace,
+	}] = useDeleteWorkspaceMutation();
+	const handleDelete = async (id) => {
 
-        const result = await deleteWorkspace(id);
-		if (result.data.success) {
-			// TODO: alert success
+		try {
+			await deleteWorkspace(id);
+		} catch (error) {
+			// ! couldn't connect to net/server
+			console.log(error);
+			console.log(deleteWorkspaceError);
 		}
-    };
+	};
 
 	useEffect(() => {
 		data && setWorkspaces(data.workspaces);
 		workspace && setWorkspace(data.workspaces.find(({ _id }) => _id === workspace._id));
 	}, [data, workspace]);
 
+	// ! when net is off, then also it redirects even if session is there
+	// ! so check if net is off
 	if (!session) {
 
 		if (session === null) {
@@ -106,24 +142,55 @@ export default function Home() {
 	return (
 
 		<Container sx={{ pt: 3, pb: 5 }}>
-			<MuiModal
-				isOpen={ formModalOpen }
-				onClose={ closeFormModal }
-				title={ !workspace ? 'New Workspace' : 'Edit Workspace' }
-				maxWidth={ 600 }
+			{createWorkspaceData?.success && (
+				<Alert
+					msg={`Workspace "${createWorkspaceData.data.name}" created successfully!`}
+					severity="success"
+					autoHide
+				/>
+			)}
+
+			{updateWorkspaceData?.success && (
+				<Alert
+					msg={`Workspace "${updateWorkspaceData.data.name}" updated successfully!`}
+					severity="success"
+					autoHide
+				/>
+			)}
+
+			{deleteWorkspaceData?.success && (
+				<Alert
+					msg={`Workspace "${deleteWorkspaceData.data.name}" deleted successfully!`}
+					severity="success"
+					autoHide
+				/>
+			)}
+
+			{/* <Alert
+				msg="Something went wrong"
+				severity="error"
+				autoHide
+			/> */}
+
+			<JoyModal
+				isOpen={formModalOpen}
+				onClose={closeFormModal}
+				title={!workspace ? 'New Workspace' : 'Edit Workspace'}
+				maxWidth={600}
 			>
 				<WorkspaceForm
-					mode={ !workspace ? 'create' : 'edit' }
-					data={ workspace }
-					onSubmit={ !workspace ? handleCreate : handleUpdate }
+					mode={!workspace ? 'create' : 'edit'}
+					data={workspace}
+					onSubmit={!workspace ? handleCreate : handleUpdate}
+					isLoading={isCreatingWorkspace || isUpdatingWorkspace}
 				/>
-			</MuiModal>
+			</JoyModal>
 
-			{ workspaceModalOpen && (
+			{workspaceModalOpen && (
 				<Workspace
-					open={ workspaceModalOpen }
-					onClose={ closeWorkspaceModal }
-					workspace={ workspace }
+					open={workspaceModalOpen}
+					onClose={closeWorkspaceModal}
+					workspace={workspace}
 				/>
 			)}
 
@@ -134,38 +201,49 @@ export default function Home() {
 				}}
 			>
 				<Box
-					width="max-content"
-					ml="auto" mb={3}
-					px={1} py={0.5}
 					display="flex"
 					justifyContent="end"
 					alignItems="center"
 					gap={1}
-					sx={{
-						border: '1px solid #aaaa',
-						borderRadius: '3rem',
-					}}
+					mb={3}
 				>
-					<Avatar src={ session.user.image } />
+					<Tooltip
+						variant="soft"
+						arrow
+						title={(
+							<>
+								<Typography
+									level="title-md"
+									textAlign="center"
+								>
+									{session.user.name}
+								</Typography>
 
-					<Typography alignItems="center">
-						{session.user.name}
-						<br />
-						<small title={session.user.email}>
-							{session.user.email.split('@')[0]}
-						</small>
-					</Typography>
+								<Typography
+									level="body-sm"
+									textAlign="center"
+								>
+									{session.user.email}
+								</Typography>
+							</>
+						)}
+					>
+						<Avatar src={session.user.image} />
+					</Tooltip>
 
-					<Link href="/api/auth/signout">
-						<IconButton
-							title="Logout"
-							variant="solid"
-							color="danger"
-							sx={{ borderRadius: '50%' }}
-						>
-							<ExitToApp />
-						</IconButton>
-					</Link>
+					<ThemeToggleButton />
+
+					<Tooltip title="Logout" variant="soft">
+						<Link href="/api/auth/signout">
+							<IconButton
+								variant="soft"
+								color="danger"
+								sx={{ borderRadius: '50%' }}
+							>
+								<ExitToAppIcon />
+							</IconButton>
+						</Link>
+					</Tooltip>
 				</Box>
 
 				<Box
@@ -174,7 +252,7 @@ export default function Home() {
 					flexDirection="column"
 					gap={1}
 					sx={{
-						'@media (min-width: 400px)' : {
+						'@media (min-width: 400px)': {
 							flexDirection: 'row',
 							justifyContent: 'space-between',
 							alignItems: 'center',
@@ -193,14 +271,12 @@ export default function Home() {
 
 					<Button
 						size="lg"
-						onClick={ () => openFormModal() }
-						startDecorator={ <Add /> }
-						// fullWidth
+						onClick={() => openFormModal()}
+						startDecorator={<AddIcon />}
 						sx={{
-							'@media (max-width: 400px)' : {
+							'@media (max-width: 400px)': {
 								margin: 'auto',
 								display: 'flex',
-								// width: '100%',
 							},
 						}}
 					>
@@ -208,21 +284,17 @@ export default function Home() {
 					</Button>
 				</Box>
 
-				{ workspaces.length ? workspaces.map((workspace) => (
+				{workspaces.length ? workspaces.map((workspace) => (
 
 					<Card
-						key={ workspace._id }
+						key={workspace._id}
 						variant="outlined"
 						orientation="horizontal"
 						sx={{
 							mb: 1,
 							gap: 2,
 							boxShadow: 'md',
-							borderColor: 'neutral.outlinedHoverBorder'
-							// '&:hover': {
-							// 	boxShadow: 'md',
-							// 	borderColor: 'neutral.outlinedHoverBorder'
-							// },
+							borderColor: 'neutral.outlinedHoverBorder',
 						}}
 					>
 						<AspectRatio
@@ -236,75 +308,79 @@ export default function Home() {
 									?? '/static/images/default-workspace.jpg'
 								}
 								alt=""
-								width={ 90 }
-								height={ 90 }
+								width={90}
+								height={90}
 							/>
 						</AspectRatio>
 
 						<Box width="100%">
-							<div className="flex align-items-center justify-content-between">
-								<Typography
-									level="h2"
-									fontSize="lg"
-									mb={ 0.5 }
-								>
-									{ workspace.name }
+							<Box
+								display="flex"
+								justifyContent="space-between"
+							>
+								<Typography level="title-lg">
+									{workspace.name}
 								</Typography>
 
-								<div className="flex gap-1">
+								<Box
+									display="flex"
+									gap={1}
+								>
 									<IconButton
 										size="sm"
-										onClick={ () => openFormModal(workspace) }
+										color="primary"
+										variant="soft"
+										onClick={() => openFormModal(workspace)}
 									>
-										<Edit />
+										<EditIcon />
 									</IconButton>
 
-									<IconButton
-										size="sm"
-										color="danger"
-										onClick={() => handledelete(workspace._id)}
-									>
-										<Delete />
-									</IconButton>
-								</div>
-							</div>
+									<DeleteConfirmButton
+										title="Delete Workspace"
+										itemName={workspace.name}
+										onConfirm={() => handleDelete(workspace._id)}
+										isLoading={isDeletingWorkspace}
+									/>
+								</Box>
+							</Box>
 
 							<Typography
-								fontSize="sm"
-								mb={ 1 }
+								level="body-sm"
+								fontWeight="500"
+								mb={1}
 							>
-								{ workspace.description }
+								{workspace.description}
 							</Typography>
 
 							<Box
 								display="flex"
 								flexWrap="wrap"
-								gap={ 0.5 }
+								gap={0.5}
 							>
-								{ workspace.families.map((family, i) => (
+								{workspace.families.map((family, i) => (
 
 									<Link
-										key={ family._id }
-										href={ `/tree/${ family._id }` }
+										key={family._id}
+										href={`/tree/${family._id}`}
 									>
 										<Chip
-											variant={ i === 0 ? 'solid' : 'soft' }
+											variant={i === 0 ? 'solid' : 'soft'}
 											color="success"
 											size="sm"
 											startDecorator={
-												<Avatar src={ family.root?.image } />
+												<Avatar src={family.root?.image} />
 											}
 										>
-											{ family.name }
+											{family.name}
 										</Chip>
 									</Link>
 								))}
 
 								<Chip
-									// variant="outlined"
-									// color="neutral"
+									variant="solid"
+									color="primary"
 									size="sm"
-									onClick={ () => openWorkspaceModal(workspace) }
+									onClick={() => openWorkspaceModal(workspace)}
 								>
 									All Families
 								</Chip>
@@ -317,9 +393,11 @@ export default function Home() {
 						textAlign="center"
 						marginTop={4}
 					>
-						{ !data || isLoading || isFetching ? 'Loading...'
-						: isError ? 'Something wen\'t wrong...' : isSuccess && (
-
+						{!data || isLoading || isFetching ? (
+							'Loading...'
+						) : isError ? (
+							'Something wen\'t wrong...'
+						) : isSuccess && (
 							<>
 								You don&apos;t have any Workspaces. Make one using the Create Button!
 								<br />

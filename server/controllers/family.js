@@ -106,7 +106,7 @@ const updateFamily = async (req, res) => {
     const { familyId } = req.params;
 
     try {
-        const family = await Family.findByIdAndUpdate(familyId, req.body)
+        const family = await Family.findByIdAndUpdate(familyId, req.body, { new: true });
         res.status(200).json({ success: true, data: family });
     } catch (error) {
         res.status(400).json({ success: false });

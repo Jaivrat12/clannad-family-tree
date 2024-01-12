@@ -2,11 +2,22 @@ import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import zod from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Avatar } from 'primereact/avatar';
-import { Button } from 'primereact/button';
-import { Calendar } from 'primereact/calendar';
-import { InputText } from 'primereact/inputtext';
-import { SelectButton } from 'primereact/selectbutton';
+import Avatar from '@mui/joy/Avatar';
+import Box from '@mui/joy/Box';
+import Button from '@mui/joy/Button';
+import FormControl from '@mui/joy/FormControl';
+import FormHelperText from '@mui/joy/FormHelperText';
+import FormLabel from '@mui/joy/FormLabel';
+import Input from '@mui/joy/Input';
+import Radio, { radioClasses } from '@mui/joy/Radio';
+import RadioGroup from '@mui/joy/RadioGroup';
+import Sheet from '@mui/joy/Sheet';
+import { styled } from '@mui/joy/styles';
+import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
+import ManIcon from '@mui/icons-material/Man';
+import UploadIcon from '@mui/icons-material/Upload';
+import WomanIcon from '@mui/icons-material/Woman';
+import DatePicker from 'components/Common/DatePicker';
 
 const memberSchema = zod.object({
     name: zod.string().nonempty({
@@ -21,7 +32,47 @@ const memberSchema = zod.object({
     image: zod.any(),
 });
 
-const MemberForm = ({ mode, data, onSubmit }) => {
+const genderColors = {
+    male: '#0077ff',
+    female: '#ff0088',
+}
+
+const genders = [
+    {
+        label: 'Male',
+        value: 'male',
+        icon: (
+            <ManIcon
+                fontSize="inherit"
+                sx={{ color: genderColors.male }}
+            />
+        ),
+    },
+    {
+        label: 'Female',
+        value: 'female',
+        icon: (
+            <WomanIcon
+                fontSize="inherit"
+                sx={{ color: genderColors.female }}
+            />
+        ),
+    },
+];
+
+const VisuallyHiddenInput = styled('input')`
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  white-space: nowrap;
+  width: 1px;
+`;
+
+const MemberForm = ({ mode, data, onSubmit, isLoading }) => {
 
     const [preview, setPreview] = useState(data?.image ?? '');
     const [dataImageLost, setDataImageLost] = useState(false);
@@ -43,7 +94,6 @@ const MemberForm = ({ mode, data, onSubmit }) => {
 
     const watchGender = watch('gender');
     const watchImage = watch('image');
-    // console.log(dataImageLost);
 
     useEffect(() => {
 
@@ -64,9 +114,8 @@ const MemberForm = ({ mode, data, onSubmit }) => {
             ? '/members/images/default-male.jpg'
             : '/members/images/default-female.jpg'
         setPreview(image);
-    }, [watchGender, watchImage]);
+    }, [data?.image, dataImageLost, preview, watchGender, watchImage]);
 
-    // console.log(watchImage);
     useEffect(() => {
         if (watchImage?.[0]) {
             setPreview(URL.createObjectURL(watchImage[0]));
@@ -76,168 +125,192 @@ const MemberForm = ({ mode, data, onSubmit }) => {
 
     return (
 
-        <form
-            onSubmit={ handleSubmit(onSubmit) }
-            className="flex flex-column gap-3"
+        <Box
+            component="form"
+            onSubmit={handleSubmit(onSubmit)}
+            display="flex"
+            flexDirection="column"
+            gap={1}
         >
-            <Avatar
-                image={ preview }
-                icon={ !preview && 'pi pi-user' }
-                size="xlarge"
-                shape="circle"
-                style={{
-                    margin: 'auto',
-                    width: '6rem',
-                    height: '6rem',
-                    borderRadius: '50%',
-                    // border: '2px solid black',
-                    background: !preview && '#14B8A6',
-                    color: '#fff',
-                }}
-            />
-
-            <div className="flex flex-column align-items-center gap-1">
-                <input
-                    id="image-upload"
-                    type="file"
-                    accept="image/*"
-                    hidden
-                    { ...register('image') }
+            <Box
+                display="flex"
+                flexDirection="column"
+                alignItems="center"
+                gap={1}
+            >
+                <Avatar
+                    src={preview}
+                    sx={{
+                        width: '8rem',
+                        height: '8rem',
+                    }}
                 />
 
-                <label htmlFor="image-upload">
+                <Box
+                    display="flex"
+                    gap={1}
+                >
                     <Button
-                        type="button"
-                        onClick={() => document.getElementById('image-upload').click() }
+                        component="label"
+                        variant="soft"
+                        role={undefined}
+                        tabIndex={-1}
+                        startDecorator={
+                            <UploadIcon />
+                        }
                     >
                         Upload Image
+                        <VisuallyHiddenInput
+                            type="file"
+                            accept="image/*"
+                            {...register('image')}
+                        />
                     </Button>
-                </label>
 
-                {/* <Button
-                    type="button"
-                    onClick={() => data.image = null }
-                >
-                    Remove Image
-                </Button> */}
-            </div>
+                    {/* {preview && (
+                        <IconButton
+                            variant="soft"
+                            color="danger"
+                            // onClick={() => data.image = null}
+                        >
+                            X
+                        </IconButton>
+                    )} */}
+                </Box>
+            </Box>
 
-            <div className="flex flex-column gap-1">
-                <label
-                    htmlFor="name"
-                    // className="flex justify-content-center"
-                >
-                    Name
-                </label>
+            <FormControl
+                error={!!errors.name?.message}
+                required
+            >
+                <FormLabel>Name</FormLabel>
 
-                <InputText
-                    id="name"
-                    placeholder="Full name"
-                    { ...register('name') }
-                />
-                { errors.name && <small style={{ color: 'crimson' }}>{ errors.name.message }</small> }
-            </div>
+                <Input {...register('name')} />
 
-            <div className="flex flex-column gap-1">
+                <FormHelperText>
+                    {errors.name?.message}
+                </FormHelperText>
+            </FormControl>
+
+            <FormControl
+                error={!!errors.gender?.message}
+                required
+            >
+                <FormLabel>Gender</FormLabel>
+
                 <Controller
                     name="gender"
-                    control={ control }
+                    defaultValue={null}
+                    control={control}
                     render={({ field }) => (
-                        <>
-                            <label
-                                htmlFor={ field.name }
-                                // className="flex justify-content-center"
-                            >
-                                Gender
-                            </label>
+                        <RadioGroup
+                            {...field}
+                            overlay
+                            sx={{
+                                my: 0,
+                                flexDirection: 'row',
+                                gap: 2,
+                                [`& .${radioClasses.checked}`]: {
+                                    [`& .${radioClasses.action}`]: {
+                                        inset: -1,
+                                        border: '3px solid',
+                                        borderColor: genderColors[watchGender],
+                                    },
+                                },
+                                [`& .${radioClasses.radio}`]: {
+                                    display: 'contents',
+                                    '& > svg': {
+                                        zIndex: 2,
+                                        position: 'absolute',
+                                        top: '-8px',
+                                        right: '-8px',
+                                        color: genderColors[watchGender],
+                                        bgcolor: 'background.surface',
+                                        borderRadius: '50%',
+                                    },
+                                },
+                            }}
+                        >
+                            {genders.map(({ label, value, icon }) => (
+                                <Sheet
+                                    key={value}
+                                    variant="outlined"
+                                    sx={{
+                                        borderRadius: 'md',
+                                        boxShadow: 'sm',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        p: 2,
+                                        minWidth: 120,
+                                        flexGrow: 1,
+                                    }}
+                                >
+                                    <Radio
+                                        id={value}
+                                        value={value}
+                                        checkedIcon={<CheckCircleRoundedIcon />}
+                                    />
 
-                            <SelectButton
-                                id={ field.name }
-                                options={[
-                                    { name: 'Male', value: 'male' },
-                                    { name: 'Female', value: 'female' },
-                                ]}
-                                optionLabel="name"
-                                { ...field }
-                                // className="flex justify-content-center"
-                            />
+                                    <Box fontSize="3rem">
+                                        {icon}
+                                    </Box>
 
-                            { errors.gender && <small style={{ color: 'crimson' }}>{ errors.gender.message }</small> }
-                        </>
+                                    <FormLabel
+                                        htmlFor={value}
+                                        sx={{ margin: 'auto' }}
+                                    >
+                                        {label}
+                                    </FormLabel>
+                                </Sheet>
+                            ))}
+                        </RadioGroup>
                     )}
                 />
-            </div>
 
-            <div className="flex flex-column gap-1">
-                <Controller
-                    name="dob"
-                    control={ control }
-                    render={({ field }) => (
-                        <>
-                            <label
-                                htmlFor={ field.name }
-                                // className="flex justify-content-center"
-                            >
-                                Date Of Birth
-                            </label>
+                <FormHelperText>
+                    {errors.gender?.message}
+                </FormHelperText>
+            </FormControl>
 
-                            <Calendar
-                                inputId={ field.name }
-                                value={ field.value }
-                                onChange={ field.onChange }
-                                dateFormat="dd M yy"
-                                placeholder="01 Jan 1970"
-                                showIcon
-                                // touchUI
-                                baseZIndex={1300}
-                                { ...field }
-                            />
+            <Controller
+                name="dob"
+                control={control}
+                render={({ field }) => (
+                    <DatePicker
+                        {...field}
+                        label="Date Of Birth"
+                        error={errors.dob?.message}
+                    />
+                )}
+            />
 
-                            { errors.dob && <small style={{ color: 'crimson' }}>{ errors.dob.message }</small> }
-                        </>
-                    )}
-                />
-            </div>
+            <Controller
+                name="dod"
+                control={control}
+                render={({ field }) => (
+                    <DatePicker
+                        {...field}
+                        label="Date Of Death"
+                        error={errors.dod?.message}
+                    />
+                )}
+            />
 
-            <div className="flex flex-column gap-1">
-                <Controller
-                    name="dod"
-                    control={ control }
-                    render={({ field }) => (
-                        <>
-                            <label
-                                htmlFor={ field.name }
-                                // className="flex justify-content-center"
-                            >
-                                Date Of Death
-                            </label>
-
-                            <Calendar
-                                inputId={ field.name }
-                                value={ field.value }
-                                onChange={ field.onChange }
-                                dateFormat="dd M yy"
-                                placeholder="01 Jan 1970"
-                                showIcon
-                                // touchUI
-                                baseZIndex={1300}
-                                { ...field }
-                            />
-
-                            { errors.dod && <small style={{ color: 'crimson' }}>{ errors.dod.message }</small> }
-                        </>
-                    )}
-                />
-            </div>
-
-            <div style={{ textAlign: 'center' }}>
+            <Box textAlign="center">
                 <Button
-                    label={ mode === 'create' ? 'Create' : 'Save' }
                     type="submit"
-                    // icon="pi pi-plus"
-                />
-            </div>
-        </form>
+                    size="lg"
+                    loading={isLoading}
+                    loadingPosition="start"
+                >
+                    {mode === 'create'
+                        ? (isLoading ? 'Creating...' : 'Create')
+                        : (isLoading ? 'Saving...' : 'Save')
+                    }
+                </Button>
+            </Box>
+        </Box>
     );
 };
 

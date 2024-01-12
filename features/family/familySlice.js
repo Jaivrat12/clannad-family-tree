@@ -154,7 +154,6 @@ export const selectChildren = (memberId) => (state) => {
 export const updateMemberDetails = (id, updates, onSuccess) => async (dispatch) => {
 
     try {
-        window.axiosClient = axiosClient;
         const { data } = await axiosClient.put(`${id}`, updates);
         if (data.success) {
             const payload = {
@@ -163,16 +162,17 @@ export const updateMemberDetails = (id, updates, onSuccess) => async (dispatch) 
                 nuclearFamily: data.nuclearFamily,
             };
             dispatch(familySlice.actions.updateMemberDetails(payload));
-            onSuccess();
+            onSuccess(data);
         }
     } catch (err) {
         console.log(err);
     }
 };
 
-export const addMemberSpouse = (memberId, spouseId) => async (dispatch) => {
+export const addMemberSpouse = (memberId, spouseId, onSuccess, onError, onFinally) => async (dispatch) => {
 
     try {
+
         const { data } = await axiosClient.put(`${memberId}/spouse/${spouseId}`);
         if (data.success) {
 
@@ -181,13 +181,18 @@ export const addMemberSpouse = (memberId, spouseId) => async (dispatch) => {
                 nuclearFamilies: data.nuclearFamilies,
             };
             dispatch(familySlice.actions.addMemberSpouse(payload));
+            onSuccess(data);
+        } else {
+            onError(data.error);
         }
-    } catch (err) {
-        console.log(err);
+    } catch (error) {
+        onError(error?.response?.data?.error ?? error.message);
+    } finally {
+        onFinally();
     }
 };
 
-export const removeMemberSpouse = (memberId) => async (dispatch) => {
+export const removeMemberSpouse = (memberId, onSuccess, onError, onFinally) => async (dispatch) => {
 
     try {
         const { data } = await axiosClient.delete(`${memberId}/spouse`);
@@ -198,13 +203,18 @@ export const removeMemberSpouse = (memberId) => async (dispatch) => {
                 nuclearFamilies: data.nuclearFamilies,
             };
             dispatch(familySlice.actions.removeMemberSpouse(payload));
+            onSuccess(data);
+        } else {
+            onError(data.error);
         }
-    } catch (err) {
-        console.log(err);
+    } catch (error) {
+        onError(error?.response?.data?.error ?? error.message);
+    } finally {
+        onFinally();
     }
 };
 
-export const addMemberChild = (memberId, childId) => async (dispatch) => {
+export const addMemberChild = (memberId, childId, onSuccess, onError, onFinally) => async (dispatch) => {
 
     try {
         const { data } = await axiosClient.put(`${memberId}/children/${childId}`);
@@ -216,13 +226,18 @@ export const addMemberChild = (memberId, childId) => async (dispatch) => {
                 families: data.families,
             };
             dispatch(familySlice.actions.addMemberChildren(payload));
+            onSuccess(data);
+        } else {
+            onError(data.error);
         }
-    } catch (err) {
-        console.log(err);
+    } catch (error) {
+        onError(error?.response?.data?.error ?? error.message);
+    } finally {
+        onFinally();
     }
 };
 
-export const removeMemberChild = (childId) => async (dispatch) => {
+export const removeMemberChild = (childId, onSuccess, onError, onFinally) => async (dispatch) => {
 
     try {
         const { data } = await axiosClient.delete(`children/${childId}`);
@@ -233,9 +248,14 @@ export const removeMemberChild = (childId) => async (dispatch) => {
                 nuclearFamily: data.nuclearFamily,
             };
             dispatch(familySlice.actions.removeMemberChildren(payload));
+            onSuccess(data);
+        } else {
+            onError(data.error);
         }
-    } catch (err) {
-        console.log(err);
+    } catch (error) {
+        onError(error?.response?.data?.error ?? error.message);
+    } finally {
+        onFinally();
     }
 };
 

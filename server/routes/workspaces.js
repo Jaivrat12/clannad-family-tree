@@ -21,7 +21,7 @@ router.delete('/:workspaceId', deleteWorkspace);
 
 router.post('/:workspaceId/family', checkOwnership, createFamily);
 router.put('/family/:familyId', checkOwnership, updateFamily);
-router.post('/:workspaceId/family/:familyId', checkOwnership, removeFamily);
+router.delete('/family/:familyId', checkOwnership, removeFamily);
 
 router.get('/:workspaceId/members', checkOwnership, getMembersByWorkspaceId);
 router.post('/:workspaceId/members', checkOwnership, createMember);

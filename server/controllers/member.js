@@ -218,6 +218,7 @@ const removeSpouse = async (req, res) => {
             [member.gender]: null,
             [spouse.gender]: spouse._id,
             children: [],
+            workspace: spouse.workspace,
         });
         spouse.nuclearFamily = spouseNuclearFamily._id;
 

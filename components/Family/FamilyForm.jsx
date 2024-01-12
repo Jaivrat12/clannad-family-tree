@@ -1,16 +1,20 @@
 import { useForm } from 'react-hook-form';
 import zod from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from 'primereact/button';
-import { InputText } from 'primereact/inputtext';
+import Box from '@mui/joy/Box';
+import Button from '@mui/joy/Button';
+import FormControl from '@mui/joy/FormControl';
+import FormHelperText from '@mui/joy/FormHelperText';
+import FormLabel from '@mui/joy/FormLabel';
+import Input from '@mui/joy/Input';
 
 const familySchema = zod.object({
     name: zod.string().nonempty({
-        message: 'Name is required'
+        message: 'Family Name is required'
     }),
 });
 
-const FamilyForm = ({ mode, data, onSubmit }) => {
+const FamilyForm = ({ mode, data, onSubmit, isLoading }) => {
 
     const {
         register,
@@ -23,26 +27,41 @@ const FamilyForm = ({ mode, data, onSubmit }) => {
 
     return (
 
-        <form
-            onSubmit={ handleSubmit(onSubmit) }
-            className="flex flex-column gap-3"
+        /* "handleSubmit" will validate your inputs before invoking "onSubmit" */
+        <Box
+            component="form"
+            onSubmit={handleSubmit(onSubmit)}
+            display="flex"
+            flexDirection="column"
+            gap={1}
         >
-            <div className="flex flex-column gap-1">
-                <InputText
-                    placeholder="Name"
-                    { ...register('name') }
-                />
-                { errors.name && <small style={{ color: 'crimson' }}>{ errors.name.message }</small> }
-            </div>
+            <FormControl
+                error={!!errors.name?.message}
+                required
+            >
+                <FormLabel>Family Name</FormLabel>
 
-            <div style={{ textAlign: 'center' }}>
+                <Input {...register('name')} />
+
+                <FormHelperText>
+                    {errors.name?.message}
+                </FormHelperText>
+            </FormControl>
+
+            <Box textAlign="center">
                 <Button
-                    label={ mode === 'create' ? 'Create' : 'Save' }
                     type="submit"
-                    // icon="pi pi-plus"
-                />
-            </div>
-        </form>
+                    size="lg"
+                    loading={isLoading}
+                    loadingPosition="start"
+                >
+                    {mode === 'create'
+                        ? (isLoading ? 'Creating...' : 'Create')
+                        : (isLoading ? 'Saving...' : 'Save')
+                    }
+                </Button>
+            </Box>
+        </Box>
     );
 };
 

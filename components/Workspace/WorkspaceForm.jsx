@@ -1,18 +1,22 @@
 import { useForm } from 'react-hook-form';
 import zod from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from 'primereact/button';
-import { InputText } from 'primereact/inputtext';
-import { InputTextarea } from 'primereact/inputtextarea';
+import Box from '@mui/joy/Box';
+import Button from '@mui/joy/Button';
+import FormControl from '@mui/joy/FormControl';
+import FormHelperText from '@mui/joy/FormHelperText';
+import FormLabel from '@mui/joy/FormLabel';
+import Input from '@mui/joy/Input';
+import Textarea from '@mui/joy/Textarea';
 
 const workspaceSchema = zod.object({
     name: zod.string().nonempty({
-        message: 'Name is required'
+        message: 'Workspace Name is required'
     }),
     description: zod.string().optional(),
 });
 
-const WorkspaceForm = ({ mode, data, onSubmit }) => {
+const WorkspaceForm = ({ mode, data, onSubmit, isLoading }) => {
 
     const {
         register,
@@ -26,33 +30,53 @@ const WorkspaceForm = ({ mode, data, onSubmit }) => {
     return (
 
         /* "handleSubmit" will validate your inputs before invoking "onSubmit" */
-        <form
-            onSubmit={ handleSubmit(onSubmit) }
-            className="flex flex-column gap-3"
+        <Box
+            component="form"
+            onSubmit={handleSubmit(onSubmit)}
+            display="flex"
+            flexDirection="column"
+            gap={1}
         >
-            <div className="flex flex-column gap-1">
-                <InputText
-                    placeholder="Name"
-                    autoFocus
-                    { ...register('name') }
+            <FormControl
+                error={!!errors.name?.message}
+                required
+            >
+                <FormLabel>Workspace Name</FormLabel>
+
+                <Input {...register('name')} />
+
+                <FormHelperText>
+                    {errors.name?.message}
+                </FormHelperText>
+            </FormControl>
+
+            <FormControl error={!!errors.description?.message}>
+                <FormLabel>Workspace Description</FormLabel>
+
+                <Textarea
+                    minRows={5}
+                    {...register('description')}
                 />
-                { errors.name && <small style={{ color: 'crimson' }}>{ errors.name.message }</small> }
-            </div>
 
-            <InputTextarea
-                placeholder="Description"
-                rows={5}
-                {...register('description')}
-            />
+                <FormHelperText>
+                    {errors.description?.message}
+                </FormHelperText>
+            </FormControl>
 
-            <div style={{ textAlign: 'center' }}>
+            <Box textAlign="center">
                 <Button
-                    label={ mode === 'create' ? 'Create' : 'Save' }
                     type="submit"
-                    // icon="pi pi-plus"
-                />
-            </div>
-        </form>
+                    size="lg"
+                    loading={isLoading}
+                    loadingPosition="start"
+                >
+                    {mode === 'create'
+                        ? (isLoading ? 'Creating...' : 'Create')
+                        : (isLoading ? 'Saving...' : 'Save')
+                    }
+                </Button>
+            </Box>
+        </Box>
     );
 };
 

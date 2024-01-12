@@ -1,10 +1,10 @@
+import { useSelector } from 'react-redux';
 import Avatar from '@mui/joy/Avatar';
+import AvatarGroup from '@mui/joy/AvatarGroup';
 import Box from '@mui/joy/Box';
 import Typography from '@mui/joy/Typography';
 import { selectMember, selectSpouse } from 'features/family/familySlice';
-import { useSelector } from 'react-redux';
 import settings from '../mocks/settings';
-import { AvatarGroup } from '@mui/joy';
 
 const Node = ({ id, onClick }) => {
 
@@ -81,7 +81,6 @@ const Node = ({ id, onClick }) => {
 						lineHeight={1}
 					>
 						{member.name}
-						{/* {spouse && ' ❤ ' + spouse.name} */}
 					</Typography>
 
 					{spouse && (

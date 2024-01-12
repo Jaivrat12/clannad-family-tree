@@ -4,6 +4,7 @@ import Avatar from '@mui/joy/Avatar';
 import Box from '@mui/joy/Box';
 import Button from '@mui/joy/Button';
 import Divider from '@mui/joy/Divider';
+import IconButton from '@mui/joy/IconButton';
 import List from '@mui/joy/List';
 import ListItem from '@mui/joy/ListItem';
 import ListItemContent from '@mui/joy/ListItemContent';
@@ -12,66 +13,131 @@ import Modal from '@mui/joy/Modal';
 import ModalClose from '@mui/joy/ModalClose';
 import ModalDialog from '@mui/joy/ModalDialog';
 import Typography from '@mui/joy/Typography';
-import { IconButton } from '@mui/joy';
-import { Edit } from '@mui/icons-material';
+import EditIcon from '@mui/icons-material/Edit';
 import FamilyForm from './Family/FamilyForm';
-import MuiModal from './Common/MuiModal';
-import { useCreateFamilyMutation, useUpdateFamilyMutation } from 'services/workspace';
+import Alert from './Common/Alert';
+import DeleteConfirmButton from './Common/DeleteConfirmButton';
+import JoyModal from './Common/JoyModal';
+import {
+    useCreateFamilyMutation,
+    useDeleteFamilyMutation,
+    useUpdateFamilyMutation,
+} from 'services/workspace';
 
 const Workspace = ({ workspace, open, onClose }) => {
 
     const [family, setFamily] = useState(null);
 
     const [formModalOpen, setFormModalOpen] = useState(false);
-	const openFormModal = (family) => {
-		setFormModalOpen(true);
-		family && setFamily(family);
-	};
+    const openFormModal = (family) => {
+        setFormModalOpen(true);
+        family && setFamily(family);
+    };
 
-	const closeFormModal = () => {
-		setFormModalOpen(false);
-		setFamily(null);
-	};
+    const closeFormModal = () => {
+        setFormModalOpen(false);
+        setFamily(null);
+    };
 
-    const [createFamily] = useCreateFamilyMutation();
+    const [createFamily, {
+        data: createFamilyData,
+        error: createFamilyError,
+        isLoading: isCreatingFamily,
+    }] = useCreateFamilyMutation();
     const handleCreate = async (family) => {
 
         const result = await createFamily({
             workspaceId: workspace._id,
             family
         });
-		if (result.data.success) {
-			closeFormModal();
-		}
+        try {
+            if (result.data.success) {
+                closeFormModal();
+            }
+        } catch (error) {
+            console.log(error);
+            console.log(createFamilyError);
+        }
     };
 
-    const [updateFamily] = useUpdateFamilyMutation();
+    const [updateFamily, {
+        data: updateFamilyData,
+        error: updateFamilyError,
+        isLoading: isUpdatingFamily,
+    }] = useUpdateFamilyMutation();
     const handleUpdate = async (updates) => {
 
         const result = await updateFamily({
             id: family._id,
             updates,
         });
-		if (result.data.success) {
-			closeFormModal();
-		}
+        try {
+            if (result.data.success) {
+                closeFormModal();
+            }
+        } catch (error) {
+            console.log(error);
+            console.log(updateFamilyError);
+        }
+    };
+
+    const [deleteFamily, {
+        data: deleteFamilyData,
+        error: deleteFamilyError,
+        isLoading: isDeletingFamily,
+    }] = useDeleteFamilyMutation();
+    const handleDelete = async (id) => {
+        const result = await deleteFamily(id);
+        try {
+            if (result.data.success) {
+                closeFormModal();
+            }
+        } catch (error) {
+            console.log(error);
+            console.log(deleteFamilyError);
+        }
     };
 
     return (
 
         <>
-            <MuiModal
-                isOpen={ formModalOpen }
-                onClose={ closeFormModal }
-				title={ !family ? 'New Family' : 'Edit Family' }
-                maxWidth={ 600 }
+            {createFamilyData?.success && (
+                <Alert
+                    msg={`New family created successfully!`}
+                    severity="success"
+                    autoHide
+                />
+            )}
+
+            {updateFamilyData?.success && (
+                <Alert
+                    msg={`Family "${updateFamilyData.data.name}" updated successfully!`}
+                    severity="success"
+                    autoHide
+                />
+            )}
+
+            {deleteFamilyData?.success && (
+                <Alert
+                    msg={`Family deleted successfully!`}
+                    severity="success"
+                    autoHide
+                />
+            )}
+
+            <JoyModal
+                isOpen={formModalOpen}
+                onClose={closeFormModal}
+                title={!family ? 'New Family' : 'Edit Family'}
+                maxWidth={600}
             >
                 <FamilyForm
-					mode={ !family ? 'create' : 'edit' }
-                    data={ family }
-                    onSubmit={ !family ? handleCreate : handleUpdate }
+                    mode={!family ? 'create' : 'edit'}
+                    data={family}
+                    onSubmit={!family ? handleCreate : handleUpdate}
+                    isLoading={isCreatingFamily || isUpdatingFamily}
                 />
-            </MuiModal>
+            </JoyModal>
 
             <Modal
                 open={open}
@@ -103,81 +169,76 @@ const Workspace = ({ workspace, open, onClose }) => {
                         }}
                     />
 
-                    <Typography
-                        level="h6"
-                        fontWeight={600}
-                    >
-                        { workspace.name } Families
+                    <Typography level="title-lg">
+                        {workspace.name} Families
                     </Typography>
 
-                    <Divider sx={{ my: 2 }} />
+                    <Divider />
 
-                    { workspace.families.length ? (
+                    {workspace.families.length ? (
 
                         <List
                             sx={{
-                                '--List-decoratorSize': '56px',
+                                '--ListItemDecorator-size': '48px',
                                 overflowY: 'scroll',
                             }}
                         >
-                            { workspace.families.map((family) => (
+                            {workspace.families.map((family) => (
 
-                                <ListItem key={ family._id }>
-                                    <Box
-                                        width="100%"
-                                        display="flex"
-                                        alignItems="center"
-                                        gap={1}
-                                    >
-                                        <ListItemDecorator sx={{ alignSelf: 'flex-start' }}>
+                                <ListItem key={family._id}>
+                                    <ListItemDecorator>
+                                        <Link
+                                            href={`/tree/${family._id}`}
+                                            onClick={onClose}
+                                        >
+                                            <Avatar src={family.root?.image} />
+                                        </Link>
+                                    </ListItemDecorator>
+
+                                    <ListItemContent>
+                                        <Box
+                                            display="flex"
+                                            justifyContent="space-between"
+                                            alignItems="start"
+                                        >
                                             <Link
-                                                href={ `/tree/${ family._id }` }
-                                                onClick={ onClose }
+                                                href={`/tree/${family._id}`}
+                                                onClick={onClose}
                                             >
-                                                <Avatar src={ family.root?.image } />
+                                                <Typography level="title-md">
+                                                    {family.name}
+                                                </Typography>
+
+                                                <Typography level="body-sm" fontWeight="500">
+                                                    {family.root?.name}
+                                                </Typography>
                                             </Link>
-                                        </ListItemDecorator>
 
-                                        <ListItemContent>
-                                            <div className="flex align-items-start justify-content-between">
-                                                <Link
-                                                    href={ `/tree/${ family._id }` }
-                                                    onClick={ onClose }
+                                            <Box
+                                                display="flex"
+                                                gap={1}
+                                            >
+                                                <IconButton
+                                                    color="primary"
+                                                    variant="soft"
+                                                    size="sm"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        openFormModal(family);
+                                                    }}
                                                 >
-                                                    <div>
-                                                        <Typography>
-                                                            { family.name } Family
-                                                        </Typography>
+                                                    <EditIcon />
+                                                </IconButton>
 
-                                                        <Typography level="body2">
-                                                            { family.root?.name }
-                                                        </Typography>
-                                                    </div>
-                                                </Link>
-
-                                                <div className="flex gap-1">
-                                                    <IconButton
-                                                        size="sm"
-                                                        onClick={ (e) => {
-                                                            e.preventDefault();
-                                                            openFormModal(family);
-                                                        }}
-                                                    >
-                                                        <Edit />
-                                                    </IconButton>
-
-                                                    {/* <Button
-                                                        size="small"
-                                                        severity="danger"
-                                                        icon={ PrimeIcons.TRASH }
-                                                        onClick={ () => delteWorkspace(workspace._id) }
-                                                        className="py-1"
-                                                        disabled={ isLoading }
-                                                    /> */}
-                                                </div>
-                                            </div>
-                                        </ListItemContent>
-                                    </Box>
+                                                <DeleteConfirmButton
+                                                    title="Delete Family"
+                                                    itemName={family.name}
+                                                    onConfirm={() => handleDelete(family._id)}
+                                                    isLoading={isDeletingFamily}
+                                                />
+                                            </Box>
+                                        </Box>
+                                    </ListItemContent>
                                 </ListItem>
                             ))}
                         </List>
@@ -188,8 +249,8 @@ const Workspace = ({ workspace, open, onClose }) => {
                     )}
 
                     <Button
-                        onClick={ () => openFormModal() }
-                        sx={{ mt: 3 }}
+                        onClick={() => openFormModal()}
+                        sx={{ mt: 1 }}
                     >
                         New Family
                     </Button>
