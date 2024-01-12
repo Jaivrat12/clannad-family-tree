@@ -6,21 +6,21 @@ import LightModeIcon from '@mui/icons-material/LightMode';
 
 const ThemeToggleButton = () => {
 
-    const { mode, setMode } = useColorScheme();
-    const isDark = mode === 'dark';
+	const { mode, systemMode, setMode} = useColorScheme();
+	const isDarkMode = [mode, systemMode].includes('dark');
     return (
 
         <Tooltip
-            title={`${isDark ? 'Light' : 'Dark'} Mode`}
+            title={`${isDarkMode ? 'Light' : 'Dark'} Mode`}
             variant="soft"
         >
             <IconButton
                 variant="soft"
-                color={isDark ? 'warning' : 'primary'}
-                onClick={() => setMode(isDark ? 'light' : 'dark')}
+                color={isDarkMode ? 'warning' : 'primary'}
+                onClick={() => setMode(isDarkMode ? 'light' : 'dark')}
                 sx={{ borderRadius: '50%' }}
             >
-                {isDark ? (
+                {isDarkMode ? (
                     <LightModeIcon />
                 ) : (
                     <DarkModeIcon />

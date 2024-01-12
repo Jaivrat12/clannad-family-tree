@@ -57,8 +57,8 @@ export default function FamilyTree() {
 	const { familyId } = router.query;
 	const dispatch = useDispatch();
 
-	const { mode } = useColorScheme();
-	const isDarkMode = mode === 'dark';
+	const { mode, systemMode } = useColorScheme();
+	const isDarkMode = [mode, systemMode].includes('dark');
 
 	const {
 		data: familyData,
