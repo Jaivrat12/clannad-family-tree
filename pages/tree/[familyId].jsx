@@ -124,23 +124,6 @@ export default function FamilyTree() {
 		setMemberId(id);
 	};
 
-	useEffect(() => {
-
-		const preventCtrlWheelZoom = (e) => {
-			if (e.ctrlKey) {
-				e.preventDefault();
-			}
-		};
-
-		document.addEventListener(
-			'wheel',
-			preventCtrlWheelZoom,
-			{ passive: false },
-		);
-
-		return () => document.removeEventListener('wheel', preventCtrlWheelZoom, { passive: false });
-	}, []);
-
 	if (!session) {
 
 		if (session === null) {

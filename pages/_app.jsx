@@ -1,4 +1,5 @@
 import Head from 'next/head';
+import { useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { SessionProvider } from 'next-auth/react';
 import { CssVarsProvider } from '@mui/joy/styles';
@@ -15,6 +16,29 @@ import '@fontsource/public-sans';
 export default function App({ Component, pageProps: { session, ...pageProps } }) {
 
 	const title = (Component.title || '') && Component.title + ' | ';
+
+	useEffect(() => {
+
+		const preventCtrlWheelZoom = (e) => {
+			if (e.ctrlKey) {
+				e.preventDefault();
+			}
+		};
+		const preventTouchZoom = (e) => {
+			if (e.touches.length > 1) {
+				e.preventDefault();
+			}
+		};
+		const options = { passive: false };
+
+		document.addEventListener('wheel', preventCtrlWheelZoom, options);
+		document.addEventListener('touchstart', preventTouchZoom, options);
+
+		return () => {
+			document.removeEventListener('wheel', preventCtrlWheelZoom, options);
+			document.removeEventListener('touchstart', preventTouchZoom, options);
+		};
+	}, []);
 
 	return (
 
