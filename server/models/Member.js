@@ -41,4 +41,13 @@ const MemberSchema = new mongoose.Schema({
     },
 });
 
+MemberSchema.pre('save', function (next) {
+    const { dob, dod } = this;
+    if (dob && dod && dod < dob) {
+        next('Date of Death can\'t be before Date of Birth');
+    } else {
+        next();
+    }
+});
+
 module.exports = mongoose.model('Member', MemberSchema);

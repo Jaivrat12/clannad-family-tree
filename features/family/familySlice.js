@@ -151,7 +151,7 @@ export const selectChildren = (memberId) => (state) => {
 };
 
 /********************** ACTIONS **********************/
-export const updateMemberDetails = (id, updates, onSuccess) => async (dispatch) => {
+export const updateMemberDetails = (id, updates, onSuccess, onError, onFinally) => async (dispatch) => {
 
     try {
         const { data } = await axiosClient.put(`${id}`, updates);
@@ -163,9 +163,13 @@ export const updateMemberDetails = (id, updates, onSuccess) => async (dispatch) 
             };
             dispatch(familySlice.actions.updateMemberDetails(payload));
             onSuccess(data);
+        } else {
+            onError(data.error);
         }
-    } catch (err) {
-        console.log(err);
+    } catch (error) {
+        onError(error?.response?.data?.error ?? error.message);
+    } finally {
+        onFinally();
     }
 };
 

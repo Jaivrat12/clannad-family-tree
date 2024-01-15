@@ -68,7 +68,7 @@ const updateMember = async (req, res) => {
 
         res.status(200).json({ success: true, member, nuclearFamily });
     } catch (error) {
-        res.status(400).json({ success: false });
+        res.status(400).json({ success: false, error });
     }
 };
 

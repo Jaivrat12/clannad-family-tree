@@ -145,9 +145,17 @@ const Profile = ({
                 msg: `${data.member.name}'s details updated successfully!`,
                 severity: 'success',
             });
+        };
+        const onError = (error) => {
+            setAlertState({
+                msg: error,
+                severity: 'error',
+            });
+        };
+        const onFinally = () => {
             setIsUpdatingMember(false);
         };
-        dispatch(updateMemberDetails(memberId, formData, onSuccess));
+        dispatch(updateMemberDetails(memberId, formData, onSuccess, onError, onFinally));
     };
 
     const [isAddingSpouse, setIsAddingSpouse] = useState(false);

@@ -40,14 +40,14 @@ const MembersList = ({
         return name.toLowerCase().includes(query.toLowerCase());
     });
 
+    const alertInit = { msg: '', severity: '' };
+    const [alert, setAlert] = useState(alertInit);
     const [formModalOpen, setFormModalOpen] = useState(false);
     const openFormModal = () => setFormModalOpen(true);
     const closeFormModal = () => setFormModalOpen(false);
 
     const [createMember, {
-        data: createMemberData,
-        error: createMemberError,
-        isLoading: isCreatingMember,
+        isLoading: isCreatingMember
     }] = useCreateMemberMutation();
     const handleCreate = async (member) => {
 
@@ -59,27 +59,36 @@ const MembersList = ({
             }
         }
 
+        setAlert(alertInit);
         const result = await createMember({
             workspaceId,
             member: formData
         });
         try {
-            if (result.data.success) {
+            if (result.data?.success) {
+                setAlert({
+                    severity: 'success',
+                    msg: `New member "${result.data.member.name}" created successfully!`,
+                });
                 setFormModalOpen(false);
+            } else if (result.error) {
+                setAlert({
+                    severity: 'error',
+                    msg: result.error.data?.error ?? 'Something went wrong!',
+                });
             }
         } catch (error) {
             console.log(error);
-            console.log(createMemberError);
         }
     };
 
     return (
 
         <>
-            {createMemberData?.success && (
+            {alert.msg && (
                 <Alert
-                    msg={`New member "${createMemberData.member.name}" created successfully!`}
-                    severity="success"
+                    msg={alert.msg}
+                    severity={alert.severity}
                     autoHide
                 />
             )}
