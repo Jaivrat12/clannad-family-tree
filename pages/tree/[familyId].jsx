@@ -106,10 +106,20 @@ export default function FamilyTree() {
 
 	const family = useSelector((state) => state.family);
 
-	const [showFamilyMembersOnly, setShowFamilyMembersOnly] = useState(true);
-	const members = showFamilyMembersOnly
-		? denormalize(family.data.members ?? [])
-		: workspaceMembers.members;
+	const memberCategories = {
+		workspace: {
+			key: 'workspace',
+			label: 'Workspace',
+			data: workspaceMembers?.members ?? [],
+		},
+		family: {
+			key: 'family',
+			label: 'Family Only',
+			data: denormalize(family.data.members ?? []),
+		},
+	};
+	const [memberCategory, setMemberCategory] = useState('workspace');
+	const members = memberCategories[memberCategory].data;
 
 	const [dimensions, translate, containerRef] = useCenteredTree();
 	const [changed, setChanged] = useState(true);
@@ -260,12 +270,13 @@ export default function FamilyTree() {
 					</IconButton>
 
 					<MembersList
-						title={`${showFamilyMembersOnly ? 'Family' : 'Workspace'} Members (${members.length})`}
+						title={`Members (${members.length})`}
 						members={members}
 						onClick={(member) => setMemberId(member._id)}
 						workspaceId={workspaceData.workspaces[0]._id}
-						showFamilyMembersOnly={showFamilyMembersOnly}
-						setShowFamilyMembersOnly={setShowFamilyMembersOnly}
+						memberCategory={memberCategory}
+						setMemberCategory={setMemberCategory}
+						memberCategories={Object.values(memberCategories)}
 						open={membersListOpen}
 						onClose={() => setMembersListOpen(false)}
 					/>

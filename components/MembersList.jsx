@@ -2,9 +2,8 @@ import { Fragment, useState } from 'react';
 import Avatar from '@mui/joy/Avatar';
 import Box from '@mui/joy/Box';
 import Button from '@mui/joy/Button';
+import Chip from '@mui/joy/Chip';
 import Divider from '@mui/joy/Divider';
-import FormControl from '@mui/joy/FormControl';
-import FormLabel from '@mui/joy/FormLabel';
 import Input from '@mui/joy/Input';
 import ListDivider from '@mui/joy/ListDivider';
 import List from '@mui/joy/List';
@@ -15,8 +14,9 @@ import ListItemDecorator from '@mui/joy/ListItemDecorator';
 import Modal from '@mui/joy/Modal';
 import ModalClose from '@mui/joy/ModalClose';
 import ModalDialog from '@mui/joy/ModalDialog';
+import Radio from '@mui/joy/Radio';
+import RadioGroup from '@mui/joy/RadioGroup';
 import Sheet from '@mui/joy/Sheet';
-import Switch from '@mui/joy/Switch';
 import Typography from '@mui/joy/Typography';
 import MemberForm from './Member/MemberForm';
 import Alert from './Common/Alert';
@@ -31,8 +31,9 @@ const MembersList = ({
     workspaceId,
     open,
     onClose,
-    showFamilyMembersOnly,
-    setShowFamilyMembersOnly,
+    memberCategory,
+    setMemberCategory,
+    memberCategories,
 }) => {
 
     const [query, setQuery] = useState('');
@@ -153,22 +154,42 @@ const MembersList = ({
                             sx={{ mb: 1 }}
                         />
 
-                        {!!setShowFamilyMembersOnly && (
-                            <FormControl
+                        {!!memberCategories && (
+                            <RadioGroup
+                                name="member-category"
+                                aria-labelledby="member-category"
                                 orientation="horizontal"
-                                sx={{ justifyContent: 'space-between' }}
+                                sx={{
+                                    flexWrap: 'wrap',
+                                    gap: 1,
+                                    mb: 1,
+                                }}
                             >
-                                <FormLabel sx={{ fontWeight: 'bold' }}>
-                                    Show members of this family only
-                                </FormLabel>
-
-                                <Switch
-                                    checked={showFamilyMembersOnly}
-                                    onChange={(event) =>
-                                        setShowFamilyMembersOnly(event.target.checked)
-                                    }
-                                />
-                            </FormControl>
+                                {memberCategories.map(({ key, label }) => {
+                                    const checked = memberCategory === key;
+                                    return (
+                                        <Chip
+                                            key={key}
+                                            color={checked ? 'primary' : 'neutral'}
+                                            size="sm"
+                                        >
+                                            <Radio
+                                                disableIcon
+                                                overlay
+                                                label={label}
+                                                value={key}
+                                                checked={checked}
+                                                size="sm"
+                                                onChange={(event) => {
+                                                    if (event.target.checked) {
+                                                        setMemberCategory(key);
+                                                    }
+                                                }}
+                                            />
+                                        </Chip>
+                                    );
+                                })}
+                            </RadioGroup>
                         )}
 
                         <Typography level="title-sm">
