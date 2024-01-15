@@ -1,25 +1,12 @@
 html,
-body {
-	height: 100%;
-	/* --font-family: Quicksand; */
-	/* font-family: Quicksand, var(--font-family); */
-	/* min-height: 100%; */
-	/* max-width: 100vw; */
-	/* overflow-x: hidden; */
-}
-
+body,
 #__next {
 	height: 100%;
-}
-
-.rd3t-tree-container {
-	/* display: flex; */
+	overflow: auto;
+	/* --font-family: Quicksand; */
+	/* font-family: Quicksand, var(--font-family); */
 }
 
 .dark-tree-link-path {
 	stroke: #888 !important;
-}
-
-a {
-	text-decoration: none;
 }

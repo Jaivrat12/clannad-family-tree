@@ -77,7 +77,7 @@ export default function FamilyTree() {
 	const {
 		data: parentlessMembers
 	} = useGetMembersByWorkspaceIdQuery({
-		workspaceId: workspaceData?.workspaces?.[0]._id,
+		workspaceId: workspaceData?.workspaces?.[0]?._id,
 		filters: { hasParent: false },
 	}, {
 		skip: !workspaceData || isFamilyLoading || !!familyData?.data?.root,
@@ -86,7 +86,7 @@ export default function FamilyTree() {
 	const {
 		data: workspaceMembers
 	} = useGetMembersByWorkspaceIdQuery({
-		workspaceId: workspaceData?.workspaces?.[0]._id,
+		workspaceId: workspaceData?.workspaces?.[0]?._id,
 	}, {
 		skip: !workspaceData,
 	});

@@ -5,6 +5,7 @@ import Box from '@mui/joy/Box';
 import Button from '@mui/joy/Button';
 import Divider from '@mui/joy/Divider';
 import IconButton from '@mui/joy/IconButton';
+import JoyLink from '@mui/joy/Link';
 import List from '@mui/joy/List';
 import ListItem from '@mui/joy/ListItem';
 import ListItemContent from '@mui/joy/ListItemContent';
@@ -201,8 +202,12 @@ const Workspace = ({ workspace, open, onClose }) => {
                                             justifyContent="space-between"
                                             alignItems="start"
                                         >
-                                            <Link
+                                            <JoyLink
+                                                component={Link}
                                                 href={`/tree/${family._id}`}
+                                                underline="none"
+                                                flexDirection="column"
+                                                alignItems="start"
                                                 onClick={onClose}
                                             >
                                                 <Typography level="title-md">
@@ -212,7 +217,7 @@ const Workspace = ({ workspace, open, onClose }) => {
                                                 <Typography level="body-sm" fontWeight="500">
                                                     {family.root?.name}
                                                 </Typography>
-                                            </Link>
+                                            </JoyLink>
 
                                             <Box
                                                 display="flex"
