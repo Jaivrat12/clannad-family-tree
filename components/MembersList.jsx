@@ -17,6 +17,7 @@ import ModalDialog from '@mui/joy/ModalDialog';
 import Radio from '@mui/joy/Radio';
 import RadioGroup from '@mui/joy/RadioGroup';
 import Sheet from '@mui/joy/Sheet';
+import Skeleton from '@mui/joy/Skeleton';
 import Typography from '@mui/joy/Typography';
 import MemberForm from './Member/MemberForm';
 import Alert from './Common/Alert';
@@ -34,6 +35,7 @@ const MembersList = ({
     memberCategory,
     setMemberCategory,
     memberCategories,
+    isLoading = false,
 }) => {
 
     const [query, setQuery] = useState('');
@@ -145,59 +147,104 @@ const MembersList = ({
 
                     <Divider sx={{ mb: 1 }} />
 
-                    <Box>
-                        <Input
-                            placeholder="Search for members..."
-                            value={query}
-                            onChange={(e) => setQuery(e.target.value)}
-                            autoFocus
-                            sx={{ mb: 1 }}
-                        />
+                    {!isLoading ? (
+                        <Box>
+                            <Input
+                                placeholder="Search for members..."
+                                value={query}
+                                onChange={(e) => setQuery(e.target.value)}
+                                autoFocus
+                                sx={{ mb: 1 }}
+                            />
 
-                        {!!memberCategories && (
-                            <RadioGroup
-                                name="member-category"
-                                aria-labelledby="member-category"
-                                orientation="horizontal"
+                            {!!memberCategories && (
+                                <RadioGroup
+                                    name="member-category"
+                                    aria-labelledby="member-category"
+                                    orientation="horizontal"
+                                    sx={{
+                                        flexWrap: 'wrap',
+                                        gap: 1,
+                                        mb: 1,
+                                    }}
+                                >
+                                    {memberCategories.map(({ key, label }) => {
+                                        const checked = memberCategory === key;
+                                        return (
+                                            <Chip
+                                                key={key}
+                                                color={checked ? 'primary' : 'neutral'}
+                                                size="sm"
+                                            >
+                                                <Radio
+                                                    disableIcon
+                                                    overlay
+                                                    label={label}
+                                                    value={key}
+                                                    checked={checked}
+                                                    size="sm"
+                                                    onChange={(event) => {
+                                                        if (event.target.checked) {
+                                                            setMemberCategory(key);
+                                                        }
+                                                    }}
+                                                />
+                                            </Chip>
+                                        );
+                                    })}
+                                </RadioGroup>
+                            )}
+
+                            <Typography level="title-sm">
+                                Showing {filteredMembers.length} member{filteredMembers.length !== 1 && 's'}
+                            </Typography>
+                        </Box>
+                    ) : (
+                        <Typography level="title-md">
+                            Loading members...
+                        </Typography>
+                    )}
+
+                    {isLoading ? (
+                        <Sheet
+                            variant="outlined"
+                            sx={{
+                                borderRadius: 'md',
+                                overflowY: 'scroll',
+                            }}
+                        >
+                            <List
                                 sx={{
-                                    flexWrap: 'wrap',
-                                    gap: 1,
-                                    mb: 1,
+                                    '--ListItemDecorator-size': '52px',
                                 }}
                             >
-                                {memberCategories.map(({ key, label }) => {
-                                    const checked = memberCategory === key;
-                                    return (
-                                        <Chip
-                                            key={key}
-                                            color={checked ? 'primary' : 'neutral'}
-                                            size="sm"
-                                        >
-                                            <Radio
-                                                disableIcon
-                                                overlay
-                                                label={label}
-                                                value={key}
-                                                checked={checked}
-                                                size="sm"
-                                                onChange={(event) => {
-                                                    if (event.target.checked) {
-                                                        setMemberCategory(key);
-                                                    }
-                                                }}
-                                            />
-                                        </Chip>
-                                    );
-                                })}
-                            </RadioGroup>
-                        )}
+                                {Array(3).fill({}).map((_, i) => (
 
-                        <Typography level="title-sm">
-                            Showing {filteredMembers.length} member{filteredMembers.length !== 1 && 's'}
-                        </Typography>
-                    </Box>
+                                    <Fragment key={i}>
+                                        <ListItem>
+                                            <ListItemDecorator sx={{ alignSelf: 'flex-start' }}>
+                                                <Avatar>
+                                                    <Skeleton />
+                                                </Avatar>
+                                            </ListItemDecorator>
 
-                    {filteredMembers.length ? (
+                                            <ListItemContent>
+                                                <Typography level="title-md">
+                                                    <Skeleton>
+                                                        Some Name is Loading...
+                                                    </Skeleton>
+                                                </Typography>
+                                            </ListItemContent>
+                                        </ListItem>
+
+                                        {i < 2 && (
+                                            <ListDivider inset="startContent" />
+                                        )}
+                                    </Fragment>
+                                ))}
+                            </List>
+                        </Sheet>
+                    ) : filteredMembers.length ? (
                         <Sheet
                             variant="outlined"
                             sx={{
@@ -240,7 +287,7 @@ const MembersList = ({
                         </Typography>
                     )}
 
-                    {!disableCreate && (
+                    {!isLoading && !disableCreate && (
                         <Button
                             onClick={() => openFormModal()}
                             sx={{ mt: 1 }}

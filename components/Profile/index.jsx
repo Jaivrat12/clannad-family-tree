@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Avatar from '@mui/joy/Avatar';
 import AvatarGroup from '@mui/joy/AvatarGroup';
@@ -9,10 +9,10 @@ import Modal from '@mui/joy/Modal';
 import ModalClose from '@mui/joy/ModalClose';
 import Sheet from '@mui/joy/Sheet';
 import Typography from '@mui/joy/Typography';
-import MemberForm from './Member/MemberForm';
-import MembersList from './MembersList';
-import Alert from './Common/Alert';
-import JoyModal from './Common/JoyModal';
+import ProfileActions from './ProfileActions';
+import MemberForm from '../Member/MemberForm';
+import Alert from '../Common/Alert';
+import JoyModal from '../Common/JoyModal';
 import {
     addMemberChild,
     addMemberSpouse,
@@ -23,8 +23,6 @@ import {
     selectSpouse,
     updateMemberDetails,
 } from 'features/family/familySlice';
-import { useGetMembersByWorkspaceIdQuery } from 'services/workspace';
-import { denormalize } from 'utils';
 
 const genderMap = {
     male: 'Wife',
@@ -70,8 +68,6 @@ const Profile = ({
     const spouse = useSelector(selectSpouse(memberId));
     const children = useSelector(selectChildren(memberId));
 
-    const familyMembers = useSelector((state) => state.family.data.members);
-
     const { _id, name, image, gender, dob, dod } = member;
     const formatter = Intl.DateTimeFormat('en-US', {
         dateStyle: 'medium'
@@ -84,40 +80,8 @@ const Profile = ({
     const openFormModal = () => setFormModalOpen(true);
     const closeFormModal = () => setFormModalOpen(false);
 
-    const [memberList, setMemberList] = useState('');
-    const closeMembersList = () => setMemberList('');
-
-    const [lists, setLists] = useState({
-        spouseList: [],
-        childList: [],
-        parentList: [],
-    });
-    const [isEnabled, setIsEnabled] = useState({
-        spouseList: false,
-        childList: false,
-        parentList: false,
-    });
-
-    const {
-        data: spouseList
-    } = useGetMembersByWorkspaceIdQuery({
-        workspaceId,
-        filters: {
-            gender: member.gender === 'female' ? 'male' : 'female',
-            hasSpouse: false,
-        },
-    }, {
-        skip: !isEnabled.spouseList,
-    });
-
-    const {
-        data: childList
-    } = useGetMembersByWorkspaceIdQuery({
-        workspaceId,
-        filters: { hasParent: false },
-    }, {
-        skip: !isEnabled.childList,
-    });
+    const [memberListType, setMemberListType] = useState('');
+    const closeMembersList = () => setMemberListType('');
 
     const alertStateInit = {
         msg: '',
@@ -262,73 +226,6 @@ const Profile = ({
         };
         dispatch(removeMemberChild(childId, onSuccess, onError, onFinally));
     };
-
-    const actionsToProps = {
-        addSpouse: {
-            title: 'Select a member as spouse...',
-            getList: () => lists.spouseList,
-            fetchData: () => setIsEnabled({ ...isEnabled, spouseList: true }),
-            onClick: (spouse) => {
-                addSpouse(spouse._id);
-                closeMembersList();
-            },
-            disableCreate: false,
-        },
-        addChild: {
-            title: 'Select a child to add...',
-            getList: () => lists.childList,
-            fetchData: () => setIsEnabled({ ...isEnabled, childList: true }),
-            onClick: (child) => {
-                addChild(memberId, child._id);
-                closeMembersList();
-            },
-            disableCreate: false,
-        },
-        addParent: {
-            title: 'Select a parent to add...',
-            getList: () => lists.childList.filter((child) => !familyMembers[child._id]),
-            fetchData: () => setIsEnabled({ ...isEnabled, childList: true }),
-            onClick: (parent) => {
-                addChild(parent._id, memberId, true);
-                closeMembersList();
-            },
-            disableCreate: false,
-        },
-        removeChild: {
-            title: 'Select a child to remove...',
-            getList: () => denormalize(children),
-            onClick: (child) => {
-                removeChild(child._id);
-                closeMembersList();
-            },
-            disableCreate: true,
-        },
-    };
-
-    useEffect(() => {
-        if (memberList && actionsToProps[memberList].fetchData) {
-            actionsToProps[memberList].fetchData();
-        }
-    }, [memberList]);
-
-    useEffect(() => {
-
-        const newLists = { ...lists };
-        let changed = false;
-        if (spouseList?.members && lists.spouseList != spouseList.members) {
-            newLists.spouseList = spouseList.members;
-            changed = true;
-        }
-
-        if (childList?.members && lists.childList != childList.members) {
-            newLists.childList = childList.members;
-            changed = true;
-        }
-
-        if (changed) {
-            setLists(newLists);
-        }
-    }, [spouseList, childList, lists, lists.spouseList.length, lists.childList.length]);
 
     return (
 
@@ -504,7 +401,7 @@ const Profile = ({
                             variant="soft"
                             size="sm"
                             onClick={!spouse
-                                ? () => setMemberList('addSpouse')
+                                ? () => setMemberListType('addSpouse')
                                 : removeSpouse
                             }
                             loading={isAddingSpouse || isRemovingSpouse}
@@ -558,7 +455,7 @@ const Profile = ({
                             variant="soft"
                             color="success"
                             size="sm"
-                            onClick={() => setMemberList('addChild')}
+                            onClick={() => setMemberListType('addChild')}
                             loading={isAddingChild}
                             loadingPosition="start"
                             fullWidth
@@ -570,7 +467,7 @@ const Profile = ({
                             variant="soft"
                             color="danger"
                             size="sm"
-                            onClick={() => setMemberList('removeChild')}
+                            onClick={() => setMemberListType('removeChild')}
                             disabled={children.length === 0}
                             loading={isRemovingChild}
                             loadingPosition="start"
@@ -584,7 +481,7 @@ const Profile = ({
                         variant="soft"
                         color={!member.parent ? 'warning' : 'neutral'}
                         size="sm"
-                        onClick={() => setMemberList('addParent')}
+                        onClick={() => setMemberListType('addParent')}
                         disabled={!!member.parent}
                         loading={isAddingParent}
                         loadingPosition="start"
@@ -595,23 +492,16 @@ const Profile = ({
                 </Sheet>
             </Modal>
 
-            {Object.keys(actionsToProps).map((action) => {
-
-                const { title, onClick, disableCreate, getList } = actionsToProps[action];
-                return (
-
-                    <MembersList
-                        key={action}
-                        title={title}
-                        members={getList()}
-                        onClick={onClick}
-                        disableCreate={disableCreate}
-                        workspaceId={workspaceId}
-                        open={memberList === action}
-                        onClose={closeMembersList}
-                    />
-                )
-            })}
+            <ProfileActions
+                workspaceId={workspaceId}
+                member={member}
+                memberChildren={children}
+                addSpouse={addSpouse}
+                addChild={addChild}
+                removeChild={removeChild}
+                memberListType={memberListType}
+                closeMembersList={closeMembersList}
+            />
         </>
     );
 };

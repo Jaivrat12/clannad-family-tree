@@ -63,7 +63,6 @@ export default function FamilyTree() {
 	const {
 		data: familyData,
 		isFetching: isFamilyFetching,
-		isLoading: isFamilyLoading,
 	} = useGetFamilyByIdQuery(familyId, {
 		skip: !familyId
 	});
@@ -80,15 +79,16 @@ export default function FamilyTree() {
 		workspaceId: workspaceData?.workspaces?.[0]?._id,
 		filters: { hasParent: false },
 	}, {
-		skip: !workspaceData || isFamilyLoading || !!familyData?.data?.root,
+		skip: !workspaceData || isFamilyFetching || !!familyData?.data?.root
 	});
 
 	const {
-		data: workspaceMembers
+		data: workspaceMembers,
+		isFetching: isWorkspaceMembersFetching,
 	} = useGetMembersByWorkspaceIdQuery({
-		workspaceId: workspaceData?.workspaces?.[0]?._id,
+		workspaceId: workspaceData?.workspaces?.[0]?._id
 	}, {
-		skip: !workspaceData,
+		skip: !workspaceData
 	});
 
 	const [rootListOpen, setRootListOpen] = useState(false);
@@ -144,7 +144,7 @@ export default function FamilyTree() {
 
 	if (!familyData) {
 
-		const isLoading = !familyId || isFamilyFetching || isFamilyLoading;
+		const isLoading = !familyId || isFamilyFetching;
 		return (
 
 			<Box
@@ -279,6 +279,7 @@ export default function FamilyTree() {
 						memberCategories={Object.values(memberCategories)}
 						open={membersListOpen}
 						onClose={() => setMembersListOpen(false)}
+						isLoading={isWorkspaceMembersFetching}
 					/>
 
 					{memberId && (
