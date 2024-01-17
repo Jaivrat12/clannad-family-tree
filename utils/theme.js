@@ -1,6 +1,13 @@
 import { extendTheme } from '@mui/joy/styles';
 
 const clannadTheme = extendTheme({
+    components: {
+        JoySkeleton: {
+            defaultProps: {
+                animation: 'wave',
+            },
+        },
+    },
     fontFamily: {
         body: '"Quicksand", var(--joy-fontFamily-fallback)',
         display: '"Quicksand", var(--joy-fontFamily-fallback)',
@@ -12,7 +19,7 @@ const clannadTheme = extendTheme({
         body1: {
             fontWeight: 500
         },
-    }
+    },
 });
 
 export default clannadTheme;

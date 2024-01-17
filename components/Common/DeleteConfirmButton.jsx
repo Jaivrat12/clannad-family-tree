@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Box from '@mui/joy/Box';
 import Button from '@mui/joy/Button';
 import IconButton from '@mui/joy/IconButton';
+import Tooltip from '@mui/joy/Tooltip';
 import Typography from '@mui/joy/Typography';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloseIcon from '@mui/icons-material/Close';
@@ -15,14 +16,16 @@ const DeleteConfirmButton = ({ title, itemName, onConfirm, isLoading }) => {
     return (
 
         <>
-            <IconButton
-                size="sm"
-                color="danger"
-                variant="soft"
-                onClick={() => setShowModal(true)}
-            >
-                <DeleteIcon />
-            </IconButton>
+            <Tooltip title={title}>
+                <IconButton
+                    size="sm"
+                    color="danger"
+                    variant="soft"
+                    onClick={() => setShowModal(true)}
+                >
+                    <DeleteIcon />
+                </IconButton>
+            </Tooltip>
 
             <JoyModal
                 maxWidth="320px"

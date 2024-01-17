@@ -11,7 +11,7 @@ import Typography from '@mui/joy/Typography';
 import { useColorScheme } from '@mui/joy/styles';
 import FolderICon from '@mui/icons-material/Folder';
 import HomeIcon from '@mui/icons-material/Home';
-import PersonIcon from '@mui/icons-material/Person';
+import GroupsIcon from '@mui/icons-material/Groups';
 import MembersList from 'components/MembersList';
 import Node from 'components/Node';
 import Profile from 'components/Profile';
@@ -266,7 +266,7 @@ export default function FamilyTree() {
 							inset: 'auto 1.5rem 4.5rem auto',
 						}}
 					>
-						<PersonIcon />
+						<GroupsIcon />
 					</IconButton>
 
 					<MembersList

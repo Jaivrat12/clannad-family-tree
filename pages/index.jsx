@@ -1,30 +1,23 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import AspectRatio from '@mui/joy/AspectRatio';
 import Avatar from '@mui/joy/Avatar';
 import Box from '@mui/joy/Box';
 import Button from '@mui/joy/Button';
-import Card from '@mui/joy/Card';
-import Chip from '@mui/joy/Chip';
 import Container from '@mui/joy/Container';
 import IconButton from '@mui/joy/IconButton';
 import Tooltip from '@mui/joy/Tooltip';
 import Typography from '@mui/joy/Typography';
 import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import Workspace from 'components/Workspace';
+import WorkspaceCard from 'components/WorkspaceCard';
 import WorkspaceForm from 'components/Workspace/WorkspaceForm';
 import Alert from 'components/Common/Alert';
-import DeleteConfirmButton from 'components/Common/DeleteConfirmButton';
 import JoyModal from 'components/Common/JoyModal';
 import ThemeToggleButton from 'components/Common/ThemeToggleButton';
 import {
 	useCreateWorkspaceMutation,
-	useDeleteWorkspaceMutation,
 	useGetWorkspacesQuery,
 	useUpdateWorkspaceMutation,
 } from 'services/workspace';
@@ -44,8 +37,13 @@ export default function Home() {
 	const { data: session } = useSession();
 	const router = useRouter();
 
-	const { data, isLoading, isFetching, isSuccess, isError } = useGetWorkspacesQuery();
-	const [workspaces, setWorkspaces] = useState([]);
+	const {
+		data: workspacesData,
+		isFetching: isFetchingWorkspaces,
+		isSuccess: isWorkspacesSuccess,
+		error: workspacesError,
+	} = useGetWorkspacesQuery();
+	const workspaces = workspacesData?.workspaces;
 	const [workspace, setWorkspace] = useState(null);
 
 	const [formModalOpen, setFormModalOpen] = useState(false);
@@ -55,16 +53,6 @@ export default function Home() {
 	};
 	const closeFormModal = () => {
 		setFormModalOpen(false);
-		setWorkspace(null);
-	};
-
-	const [workspaceModalOpen, setWorkspaceModalOpen] = useState(false);
-	const openWorkspaceModal = (workspace) => {
-		setWorkspaceModalOpen(true);
-		setWorkspace(workspace);
-	};
-	const closeWorkspaceModal = () => {
-		setWorkspaceModalOpen(false);
 		setWorkspace(null);
 	};
 
@@ -108,26 +96,9 @@ export default function Home() {
 		}
 	};
 
-	const [deleteWorkspace, {
-		data: deleteWorkspaceData,
-		error: deleteWorkspaceError,
-		isLoading: isDeletingWorkspace,
-	}] = useDeleteWorkspaceMutation();
-	const handleDelete = async (id) => {
-
-		try {
-			await deleteWorkspace(id);
-		} catch (error) {
-			// ! couldn't connect to net/server
-			console.log(error);
-			console.log(deleteWorkspaceError);
-		}
-	};
-
 	useEffect(() => {
-		data && setWorkspaces(data.workspaces);
-		workspace && setWorkspace(data.workspaces.find(({ _id }) => _id === workspace._id));
-	}, [data, workspace]);
+		workspace && setWorkspace(workspaces.find(({ _id }) => _id === workspace._id));
+	}, [workspaces, workspace]);
 
 	// ! when net is off, then also it redirects even if session is there
 	// ! so check if net is off
@@ -158,19 +129,12 @@ export default function Home() {
 				/>
 			)}
 
-			{deleteWorkspaceData?.success && (
+			{workspacesError && (
 				<Alert
-					msg={`Workspace "${deleteWorkspaceData.data.name}" deleted successfully!`}
-					severity="success"
-					autoHide
+					msg="Something went wrong"
+					severity="error"
 				/>
 			)}
-
-			{/* <Alert
-				msg="Something went wrong"
-				severity="error"
-				autoHide
-			/> */}
 
 			<JoyModal
 				isOpen={formModalOpen}
@@ -185,14 +149,6 @@ export default function Home() {
 					isLoading={isCreatingWorkspace || isUpdatingWorkspace}
 				/>
 			</JoyModal>
-
-			{workspaceModalOpen && (
-				<Workspace
-					open={workspaceModalOpen}
-					onClose={closeWorkspaceModal}
-					workspace={workspace}
-				/>
-			)}
 
 			<Box
 				sx={{
@@ -234,15 +190,15 @@ export default function Home() {
 					<ThemeToggleButton />
 
 					<Tooltip title="Logout" variant="soft">
-						<Link href="/api/auth/signout">
-							<IconButton
-								variant="soft"
-								color="danger"
-								sx={{ borderRadius: '50%' }}
-							>
-								<ExitToAppIcon />
-							</IconButton>
-						</Link>
+						<IconButton
+							component={Link}
+							href="/api/auth/signout"
+							variant="soft"
+							color="danger"
+							sx={{ borderRadius: '50%' }}
+						>
+							<ExitToAppIcon />
+						</IconButton>
 					</Tooltip>
 				</Box>
 
@@ -284,129 +240,36 @@ export default function Home() {
 					</Button>
 				</Box>
 
-				{workspaces.length ? workspaces.map((workspace) => (
+				{workspaces?.length || isFetchingWorkspaces ? (workspaces ?? Array(3).fill({})).map((workspace, i) => (
 
-					<Card
-						key={workspace._id}
-						variant="outlined"
-						orientation="horizontal"
-						sx={{
-							mb: 1,
-							gap: 2,
-							boxShadow: 'md',
-							borderColor: 'neutral.outlinedHoverBorder',
-						}}
+					<Box
+						key={workspace._id ?? i}
+						mb={2}
 					>
-						<AspectRatio
-							ratio="1"
-							sx={{ width: 90 }}
-						>
-							<Image
-								src={
-									workspace.image
-									?? workspace.families[0]?.root?.image
-									?? '/static/images/default-workspace.jpg'
-								}
-								alt=""
-								width={90}
-								height={90}
-							/>
-						</AspectRatio>
-
-						<Box width="100%">
-							<Box
-								display="flex"
-								justifyContent="space-between"
-							>
-								<Typography level="title-lg">
-									{workspace.name}
-								</Typography>
-
-								<Box
-									display="flex"
-									gap={1}
-								>
-									<IconButton
-										size="sm"
-										color="primary"
-										variant="soft"
-										onClick={() => openFormModal(workspace)}
-									>
-										<EditIcon />
-									</IconButton>
-
-									<DeleteConfirmButton
-										title="Delete Workspace"
-										itemName={workspace.name}
-										onConfirm={() => handleDelete(workspace._id)}
-										isLoading={isDeletingWorkspace}
-									/>
-								</Box>
-							</Box>
-
-							<Typography
-								level="body-sm"
-								fontWeight="500"
-								mb={1}
-							>
-								{workspace.description}
-							</Typography>
-
-							<Box
-								display="flex"
-								flexWrap="wrap"
-								gap={0.5}
-							>
-								{workspace.families.map((family, i) => (
-
-									<Link
-										key={family._id}
-										href={`/tree/${family._id}`}
-									>
-										<Chip
-											variant={i === 0 ? 'solid' : 'soft'}
-											color="success"
-											size="sm"
-											startDecorator={
-												<Avatar src={family.root?.image} />
-											}
-										>
-											{family.name}
-										</Chip>
-									</Link>
-								))}
-
-								<Chip
-									variant="solid"
-									color="primary"
-									size="sm"
-									onClick={() => openWorkspaceModal(workspace)}
-								>
-									All Families
-								</Chip>
-							</Box>
-						</Box>
-					</Card>
+						<WorkspaceCard
+							workspace={workspace}
+							openFormModal={openFormModal}
+							isLoading={isFetchingWorkspaces}
+						/>
+					</Box>
 				)) : (
 					<Typography
 						fontStyle="italic"
 						textAlign="center"
 						marginTop={4}
 					>
-						{!data || isLoading || isFetching ? (
-							'Loading...'
-						) : isError ? (
-							'Something wen\'t wrong...'
-						) : isSuccess && (
+						{workspacesError ? (
+							'Something wen\'t wrong... Couldn\'t load your workspaces'
+						) : isWorkspacesSuccess && (
 							<>
 								You don&apos;t have any Workspaces. Make one using the Create Button!
 								<br />
 								<br />
-								A Workspace is a collection of families,
+								A Workspace is a collection of family trees,
 								e.g. your father&apos;s family and your mother&apos;s family
 								are separate and have their own family trees their own parents, etc.
 								There can be many such families which you can keep in here together
-								so that everything related to your main family is kept in one <b>Workspace</b>.
+								so that every family related to your main family is kept in one <b>Workspace</b>.
 							</>
 						)}
 					</Typography>
