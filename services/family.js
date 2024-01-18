@@ -14,7 +14,7 @@ export const familyApi = createApi({
             query: (id) => `/${id}`,
             providesTags: ['Family'],
         }),
-        addRoot: builder.mutation({
+        setRoot: builder.mutation({
             query: ({ familyId, memberId }) => ({
                 url: `/${ familyId }/root/${ memberId }`,
                 method: 'PUT',
@@ -27,5 +27,5 @@ export const familyApi = createApi({
 
 export const {
     useGetFamilyByIdQuery,
-    useAddRootMutation,
+    useSetRootMutation,
 } = familyApi;

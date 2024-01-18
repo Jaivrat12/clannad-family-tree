@@ -8,10 +8,25 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import CloseIcon from '@mui/icons-material/Close';
 import JoyModal from './JoyModal';
 
-const DeleteConfirmButton = ({ title, itemName, onConfirm, isLoading }) => {
+const DeleteConfirmButton = ({
+    title,
+    itemName,
+    onConfirm,
+    isLoading,
+    preventDefault = false,
+    stopPropagation = false,
+}) => {
+
+    const onClickEvent = (e) => {
+        preventDefault && e.preventDefault();
+        stopPropagation && e.stopPropagation();
+    };
 
     const [showModal, setShowModal] = useState(false);
-    const closeModal = () => setShowModal(false);
+    const closeModal = (e) => {
+        onClickEvent(e);
+        setShowModal(false)
+    };
 
     return (
 
@@ -21,7 +36,10 @@ const DeleteConfirmButton = ({ title, itemName, onConfirm, isLoading }) => {
                     size="sm"
                     color="danger"
                     variant="soft"
-                    onClick={() => setShowModal(true)}
+                    onClick={(e) => {
+                        onClickEvent(e);
+                        setShowModal(true);
+                    }}
                 >
                     <DeleteIcon />
                 </IconButton>
@@ -48,7 +66,10 @@ const DeleteConfirmButton = ({ title, itemName, onConfirm, isLoading }) => {
                     <Button
                         color="danger"
                         variant="soft"
-                        onClick={onConfirm}
+                        onClick={(e) => {
+                            onClickEvent(e);
+                            onConfirm();
+                        }}
                         loading={isLoading}
                         startDecorator={<DeleteIcon />}
                         loadingPosition="start"

@@ -6,6 +6,10 @@ const FamilySchema = new mongoose.Schema({
 		type: String,
 		required: true,
 	},
+	description: {
+		type: String,
+		default: '',
+	},
     root: {
 		type: Schema.Types.ObjectId,
 		ref: 'Member',

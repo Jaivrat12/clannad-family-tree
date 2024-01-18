@@ -7,11 +7,13 @@ import FormControl from '@mui/joy/FormControl';
 import FormHelperText from '@mui/joy/FormHelperText';
 import FormLabel from '@mui/joy/FormLabel';
 import Input from '@mui/joy/Input';
+import Textarea from '@mui/joy/Textarea';
 
 const familySchema = zod.object({
     name: zod.string().nonempty({
         message: 'Family Name is required'
     }),
+    description: zod.string().optional(),
 });
 
 const FamilyForm = ({ mode, data, onSubmit, isLoading }) => {
@@ -45,6 +47,19 @@ const FamilyForm = ({ mode, data, onSubmit, isLoading }) => {
 
                 <FormHelperText>
                     {errors.name?.message}
+                </FormHelperText>
+            </FormControl>
+
+            <FormControl error={!!errors.description?.message}>
+                <FormLabel>Family Description</FormLabel>
+
+                <Textarea
+                    minRows={5}
+                    {...register('description')}
+                />
+
+                <FormHelperText>
+                    {errors.description?.message}
                 </FormHelperText>
             </FormControl>
 

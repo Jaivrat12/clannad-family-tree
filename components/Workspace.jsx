@@ -1,18 +1,20 @@
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useState } from 'react';
 import Avatar from '@mui/joy/Avatar';
 import Box from '@mui/joy/Box';
 import Button from '@mui/joy/Button';
 import Divider from '@mui/joy/Divider';
 import IconButton from '@mui/joy/IconButton';
-import JoyLink from '@mui/joy/Link';
 import List from '@mui/joy/List';
 import ListItem from '@mui/joy/ListItem';
+import ListItemButton from '@mui/joy/ListItemButton';
 import ListItemContent from '@mui/joy/ListItemContent';
 import ListItemDecorator from '@mui/joy/ListItemDecorator';
 import Modal from '@mui/joy/Modal';
 import ModalClose from '@mui/joy/ModalClose';
 import ModalDialog from '@mui/joy/ModalDialog';
+import Tooltip from '@mui/joy/Tooltip';
 import Typography from '@mui/joy/Typography';
 import EditIcon from '@mui/icons-material/Edit';
 import FamilyForm from './Family/FamilyForm';
@@ -25,8 +27,9 @@ import {
     useUpdateFamilyMutation,
 } from 'services/workspace';
 
-const Workspace = ({ workspace, open, onClose }) => {
+const Workspace = ({ workspace, currFamilyId, open, onClose }) => {
 
+	const router = useRouter();
     const [family, setFamily] = useState(null);
 
     const [formModalOpen, setFormModalOpen] = useState(false);
@@ -54,6 +57,7 @@ const Workspace = ({ workspace, open, onClose }) => {
         try {
             if (result.data.success) {
                 closeFormModal();
+                router.push(`/tree/${result.data.family._id}`);
             }
         } catch (error) {
             console.log(error);
@@ -187,63 +191,88 @@ const Workspace = ({ workspace, open, onClose }) => {
                             {workspace.families.map((family) => (
 
                                 <ListItem key={family._id}>
-                                    <ListItemDecorator>
-                                        <Link
-                                            href={`/tree/${family._id}`}
-                                            onClick={onClose}
-                                        >
+                                    <ListItemButton
+                                        component={Link}
+                                        href={`/tree/${family._id}`}
+                                        selected={currFamilyId === family._id}
+                                        onClick={onClose}
+                                    >
+                                        <ListItemDecorator>
                                             <Avatar src={family.root?.image} />
-                                        </Link>
-                                    </ListItemDecorator>
+                                        </ListItemDecorator>
 
-                                    <ListItemContent>
-                                        <Box
-                                            display="flex"
-                                            justifyContent="space-between"
-                                            alignItems="start"
-                                        >
-                                            <JoyLink
-                                                component={Link}
-                                                href={`/tree/${family._id}`}
-                                                underline="none"
-                                                flexDirection="column"
-                                                alignItems="start"
-                                                onClick={onClose}
-                                            >
-                                                <Typography level="title-md">
-                                                    {family.name}
-                                                </Typography>
-
-                                                <Typography level="body-sm" fontWeight="500">
-                                                    {family.root?.name}
-                                                </Typography>
-                                            </JoyLink>
-
+                                        <ListItemContent>
                                             <Box
                                                 display="flex"
+                                                justifyContent="space-between"
+                                                alignItems="center"
                                                 gap={1}
                                             >
-                                                <IconButton
-                                                    color="primary"
-                                                    variant="soft"
-                                                    size="sm"
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        openFormModal(family);
-                                                    }}
-                                                >
-                                                    <EditIcon />
-                                                </IconButton>
+                                                <Tooltip
+                                                    enterDelay={1000}
+                                                    followCursor
+                                                    title={(
+                                                        <>
+                                                            <Typography level="title-md">
+                                                                {family.name}
+                                                            </Typography>
 
-                                                <DeleteConfirmButton
-                                                    title="Delete Family"
-                                                    itemName={family.name}
-                                                    onConfirm={() => handleDelete(family._id)}
-                                                    isLoading={isDeletingFamily}
-                                                />
+                                                            <Typography level="body-sm" fontWeight="500">
+                                                                {family.root?.name}
+                                                            </Typography>
+                                                        </>
+                                                    )}
+                                                >
+                                                    <Box
+                                                        flexGrow={1}
+                                                        sx={{
+                                                            whiteSpace: 'nowrap',
+                                                            overflow: 'hidden',
+                                                            textOverflow: 'ellipsis',
+                                                            maxWidth: '100%',
+                                                        }}
+                                                    >
+                                                        <Typography level="title-md">
+                                                            {family.name}
+                                                        </Typography>
+
+                                                        <Typography level="body-sm" fontWeight="500">
+                                                            {family.root?.name}
+                                                        </Typography>
+                                                    </Box>
+                                                </Tooltip>
+
+                                                <Box
+                                                    display="flex"
+                                                    gap={1}
+                                                >
+                                                    <Tooltip title="Edit Family">
+                                                        <IconButton
+                                                            color="primary"
+                                                            variant="soft"
+                                                            size="sm"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                e.preventDefault();
+                                                                openFormModal(family);
+                                                            }}
+                                                        >
+                                                            <EditIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
+
+                                                    <DeleteConfirmButton
+                                                        title="Delete Family"
+                                                        itemName={family.name}
+                                                        onConfirm={() => handleDelete(family._id)}
+                                                        isLoading={isDeletingFamily}
+                                                        preventDefault
+                                                        stopPropagation
+                                                    />
+                                                </Box>
                                             </Box>
-                                        </Box>
-                                    </ListItemContent>
+                                        </ListItemContent>
+                                    </ListItemButton>
                                 </ListItem>
                             ))}
                         </List>

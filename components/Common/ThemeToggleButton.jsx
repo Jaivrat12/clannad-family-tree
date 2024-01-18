@@ -10,10 +10,7 @@ const ThemeToggleButton = () => {
 	const isDarkMode = [mode, systemMode].includes('dark');
     return (
 
-        <Tooltip
-            title={`${isDarkMode ? 'Light' : 'Dark'} Mode`}
-            variant="soft"
-        >
+        <Tooltip title={`${isDarkMode ? 'Light' : 'Dark'} Mode`}>
             <IconButton
                 variant="soft"
                 color={isDarkMode ? 'warning' : 'primary'}

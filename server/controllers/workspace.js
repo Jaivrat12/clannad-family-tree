@@ -112,7 +112,7 @@ const createFamily = async (req, res) => {
         }, {
             new: true,
         });
-        res.status(201).json({ success: true, workspace });
+        res.status(201).json({ success: true, workspace, family });
     } catch (error) {
         res.status(400).json({ success: false });
     }

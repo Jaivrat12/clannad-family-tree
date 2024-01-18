@@ -7,6 +7,11 @@ const clannadTheme = extendTheme({
                 animation: 'wave',
             },
         },
+        JoyTooltip: {
+            defaultProps: {
+                variant: 'soft',
+            },
+        },
     },
     fontFamily: {
         body: '"Quicksand", var(--joy-fontFamily-fallback)',

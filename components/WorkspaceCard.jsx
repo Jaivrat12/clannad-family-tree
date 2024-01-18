@@ -189,12 +189,7 @@ const WorkspaceCard = ({ workspace, openFormModal, isLoading }) => {
                         })}
                     >
                         {description} {isDescriptionLong && (
-                            <JoyLink
-                                component="button"
-                                variant="plain"
-                                underline="none"
-                                onClick={toggleDescriptionExpanded}
-                            >
+                            <JoyLink underline="none">
                                 Read {descriptionExpanded ? 'Less' : 'More'}
                             </JoyLink>
                         )}

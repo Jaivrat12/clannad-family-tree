@@ -18,7 +18,7 @@ const WorkspaceSchema = new mongoose.Schema({
     },
 	description: {
 		type: String,
-		default: null,
+		default: '',
 	},
 	image: {
 		type: String,

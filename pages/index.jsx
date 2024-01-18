@@ -164,8 +164,8 @@ export default function Home() {
 					mb={3}
 				>
 					<Tooltip
-						variant="soft"
 						arrow
+						enterTouchDelay={0}
 						title={(
 							<>
 								<Typography
@@ -189,7 +189,7 @@ export default function Home() {
 
 					<ThemeToggleButton />
 
-					<Tooltip title="Logout" variant="soft">
+					<Tooltip title="Logout">
 						<IconButton
 							component={Link}
 							href="/api/auth/signout"
