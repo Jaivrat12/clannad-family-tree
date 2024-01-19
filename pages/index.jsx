@@ -14,7 +14,7 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import WorkspaceCard from 'components/WorkspaceCard';
 import WorkspaceForm from 'components/Workspace/WorkspaceForm';
 import Alert from 'components/Common/Alert';
-import JoyModal from 'components/Common/JoyModal';
+import Modal from 'components/Common/Modal';
 import ThemeToggleButton from 'components/Common/ThemeToggleButton';
 import {
 	useCreateWorkspaceMutation,
@@ -136,7 +136,7 @@ export default function Home() {
 				/>
 			)}
 
-			<JoyModal
+			<Modal
 				isOpen={formModalOpen}
 				onClose={closeFormModal}
 				title={!workspace ? 'New Workspace' : 'Edit Workspace'}
@@ -148,7 +148,7 @@ export default function Home() {
 					onSubmit={!workspace ? handleCreate : handleUpdate}
 					isLoading={isCreatingWorkspace || isUpdatingWorkspace}
 				/>
-			</JoyModal>
+			</Modal>
 
 			<Box
 				sx={{

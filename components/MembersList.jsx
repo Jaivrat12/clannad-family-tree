@@ -3,7 +3,6 @@ import Avatar from '@mui/joy/Avatar';
 import Box from '@mui/joy/Box';
 import Button from '@mui/joy/Button';
 import Chip from '@mui/joy/Chip';
-import Divider from '@mui/joy/Divider';
 import Input from '@mui/joy/Input';
 import ListDivider from '@mui/joy/ListDivider';
 import List from '@mui/joy/List';
@@ -11,9 +10,6 @@ import ListItem from '@mui/joy/ListItem';
 import ListItemButton from '@mui/joy/ListItemButton';
 import ListItemContent from '@mui/joy/ListItemContent';
 import ListItemDecorator from '@mui/joy/ListItemDecorator';
-import Modal from '@mui/joy/Modal';
-import ModalClose from '@mui/joy/ModalClose';
-import ModalDialog from '@mui/joy/ModalDialog';
 import Radio from '@mui/joy/Radio';
 import RadioGroup from '@mui/joy/RadioGroup';
 import Sheet from '@mui/joy/Sheet';
@@ -21,7 +17,7 @@ import Skeleton from '@mui/joy/Skeleton';
 import Typography from '@mui/joy/Typography';
 import MemberForm from './Member/MemberForm';
 import Alert from './Common/Alert';
-import JoyModal from './Common/JoyModal';
+import Modal from './Common/Modal';
 import { useCreateMemberMutation } from 'services/workspace';
 
 const MembersList = ({
@@ -96,7 +92,7 @@ const MembersList = ({
                 />
             )}
 
-            <JoyModal
+            <Modal
                 isOpen={formModalOpen}
                 onClose={closeFormModal}
                 title="New Member"
@@ -107,195 +103,165 @@ const MembersList = ({
                     onSubmit={handleCreate}
                     isLoading={isCreatingMember}
                 />
-            </JoyModal>
+            </Modal>
 
             <Modal
-                open={open}
+                title={title}
+                isOpen={open}
                 onClose={onClose}
-                sx={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                }}
+                maxWidth={360}
             >
-                <ModalDialog
-                    variant="outlined"
-                    sx={{
-                        maxWidth: 360,
-                        width: '95%',
-                        maxHeight: '75%',
-                        p: 3,
-                        borderRadius: 'md',
-                        boxShadow: 'lg',
-                        outline: 'none',
-                    }}
-                >
-                    <ModalClose
-                        variant="outlined"
-                        sx={{
-                            top: 'calc(-1/4 * var(--IconButton-size))',
-                            right: 'calc(-1/4 * var(--IconButton-size))',
-                            boxShadow: '0 2px 12px 0 rgba(0 0 0 / 0.2)',
-                            borderRadius: '50%',
-                            bgcolor: 'background.body',
-                        }}
-                    />
+                {!isLoading ? (
+                    <Box>
+                        <Input
+                            placeholder="Search for members..."
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            autoFocus
+                            sx={{ mb: 1 }}
+                        />
 
-                    <Typography level="title-lg">
-                        {title}
-                    </Typography>
-
-                    <Divider sx={{ mb: 1 }} />
-
-                    {!isLoading ? (
-                        <Box>
-                            <Input
-                                placeholder="Search for members..."
-                                value={query}
-                                onChange={(e) => setQuery(e.target.value)}
-                                autoFocus
-                                sx={{ mb: 1 }}
-                            />
-
-                            {!!memberCategories && (
-                                <RadioGroup
-                                    name="member-category"
-                                    aria-labelledby="member-category"
-                                    orientation="horizontal"
-                                    sx={{
-                                        flexWrap: 'wrap',
-                                        gap: 1,
-                                        mb: 1,
-                                    }}
-                                >
-                                    {memberCategories.map(({ key, label }) => {
-                                        const checked = memberCategory === key;
-                                        return (
-                                            <Chip
-                                                key={key}
-                                                color={checked ? 'primary' : 'neutral'}
-                                                size="sm"
-                                            >
-                                                <Radio
-                                                    disableIcon
-                                                    overlay
-                                                    label={label}
-                                                    value={key}
-                                                    checked={checked}
-                                                    size="sm"
-                                                    onChange={(event) => {
-                                                        if (event.target.checked) {
-                                                            setMemberCategory(key);
-                                                        }
-                                                    }}
-                                                />
-                                            </Chip>
-                                        );
-                                    })}
-                                </RadioGroup>
-                            )}
-
-                            <Typography level="title-sm">
-                                Showing {filteredMembers.length} member{filteredMembers.length !== 1 && 's'}
-                            </Typography>
-                        </Box>
-                    ) : (
-                        <Typography level="title-md">
-                            Loading members...
-                        </Typography>
-                    )}
-
-                    {isLoading ? (
-                        <Sheet
-                            variant="outlined"
-                            sx={{
-                                borderRadius: 'md',
-                                overflowY: 'scroll',
-                            }}
-                        >
-                            <List
+                        {!!memberCategories && (
+                            <RadioGroup
+                                name="member-category"
+                                aria-labelledby="member-category"
+                                orientation="horizontal"
                                 sx={{
-                                    '--ListItemDecorator-size': '52px',
+                                    flexWrap: 'wrap',
+                                    gap: 1,
+                                    mb: 1,
                                 }}
                             >
-                                {Array(3).fill({}).map((_, i) => (
+                                {memberCategories.map(({ key, label }) => {
+                                    const checked = memberCategory === key;
+                                    return (
+                                        <Chip
+                                            key={key}
+                                            color={checked ? 'primary' : 'neutral'}
+                                            size="sm"
+                                        >
+                                            <Radio
+                                                disableIcon
+                                                overlay
+                                                label={label}
+                                                value={key}
+                                                checked={checked}
+                                                size="sm"
+                                                onChange={(event) => {
+                                                    if (event.target.checked) {
+                                                        setMemberCategory(key);
+                                                    }
+                                                }}
+                                            />
+                                        </Chip>
+                                    );
+                                })}
+                            </RadioGroup>
+                        )}
 
-                                    <Fragment key={i}>
-                                        <ListItem>
+                        <Typography level="title-sm">
+                            Showing {filteredMembers.length} member{filteredMembers.length !== 1 && 's'}
+                        </Typography>
+                    </Box>
+                ) : (
+                    <Typography level="title-md">
+                        Loading members...
+                    </Typography>
+                )}
+
+                {isLoading ? (
+                    <Sheet
+                        variant="outlined"
+                        sx={{
+                            maxHeight: 320,
+                            overflowY: 'scroll',
+                            borderRadius: 'md',
+                        }}
+                    >
+                        <List
+                            sx={{
+                                '--ListItemDecorator-size': '52px',
+                            }}
+                        >
+                            {Array(3).fill({}).map((_, i) => (
+
+                                <Fragment key={i}>
+                                    <ListItem>
+                                        <ListItemDecorator sx={{ alignSelf: 'flex-start' }}>
+                                            <Avatar>
+                                                <Skeleton />
+                                            </Avatar>
+                                        </ListItemDecorator>
+
+                                        <ListItemContent>
+                                            <Typography level="title-md">
+                                                <Skeleton>
+                                                    Some Name is Loading...
+                                                </Skeleton>
+                                            </Typography>
+                                        </ListItemContent>
+                                    </ListItem>
+
+                                    {i < 2 && (
+                                        <ListDivider inset="startContent" />
+                                    )}
+                                </Fragment>
+                            ))}
+                        </List>
+                    </Sheet>
+                ) : filteredMembers.length ? (
+                    <Sheet
+                        variant="outlined"
+                        sx={{
+                            maxHeight: 320,
+                            overflowY: 'scroll',
+                            borderRadius: 'md',
+                        }}
+                    >
+                        <List
+                            sx={{
+                                '--ListItemDecorator-size': '52px',
+                            }}
+                        >
+                            {filteredMembers.map((member, i) => (
+
+                                <Fragment key={member._id}>
+                                    <ListItem>
+                                        <ListItemButton onClick={() => onClick(member)}>
                                             <ListItemDecorator sx={{ alignSelf: 'flex-start' }}>
-                                                <Avatar>
-                                                    <Skeleton />
-                                                </Avatar>
+                                                <Avatar src={member.image} />
                                             </ListItemDecorator>
 
                                             <ListItemContent>
                                                 <Typography level="title-md">
-                                                    <Skeleton>
-                                                        Some Name is Loading...
-                                                    </Skeleton>
+                                                    {member.name}
                                                 </Typography>
                                             </ListItemContent>
-                                        </ListItem>
+                                        </ListItemButton>
+                                    </ListItem>
 
-                                        {i < 2 && (
-                                            <ListDivider inset="startContent" />
-                                        )}
-                                    </Fragment>
-                                ))}
-                            </List>
-                        </Sheet>
-                    ) : filteredMembers.length ? (
-                        <Sheet
-                            variant="outlined"
-                            sx={{
-                                borderRadius: 'md',
-                                overflowY: 'scroll',
-                            }}
-                        >
-                            <List
-                                sx={{
-                                    '--ListItemDecorator-size': '52px',
-                                }}
-                            >
-                                {filteredMembers.map((member, i) => (
+                                    {filteredMembers.length - 1 > i && (
+                                        <ListDivider inset="startContent" />
+                                    )}
+                                </Fragment>
+                            ))}
+                        </List>
+                    </Sheet>
+                ) : (
+                    <Typography textAlign="center">
+                        No members found
+                    </Typography>
+                )}
 
-                                    <Fragment key={member._id}>
-                                        <ListItem>
-                                            <ListItemButton onClick={() => onClick(member)}>
-                                                <ListItemDecorator sx={{ alignSelf: 'flex-start' }}>
-                                                    <Avatar src={member.image} />
-                                                </ListItemDecorator>
-
-                                                <ListItemContent>
-                                                    <Typography level="title-md">
-                                                        {member.name}
-                                                    </Typography>
-                                                </ListItemContent>
-                                            </ListItemButton>
-                                        </ListItem>
-
-                                        {filteredMembers.length - 1 > i && (
-                                            <ListDivider inset="startContent" />
-                                        )}
-                                    </Fragment>
-                                ))}
-                            </List>
-                        </Sheet>
-                    ) : (
-                        <Typography textAlign="center">
-                            No members found
-                        </Typography>
-                    )}
-
-                    {!isLoading && !disableCreate && (
-                        <Button
-                            onClick={() => openFormModal()}
-                            sx={{ mt: 1 }}
-                        >
-                            New Member
-                        </Button>
-                    )}
-                </ModalDialog>
+                {!isLoading && !disableCreate && (
+                    <Button
+                        onClick={() => openFormModal()}
+                        fullWidth
+                        sx={{ mt: 2 }}
+                    >
+                        New Member
+                    </Button>
+                )}
             </Modal>
         </>
     );

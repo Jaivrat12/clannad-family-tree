@@ -6,7 +6,7 @@ import Tooltip from '@mui/joy/Tooltip';
 import Typography from '@mui/joy/Typography';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloseIcon from '@mui/icons-material/Close';
-import JoyModal from './JoyModal';
+import Modal from './Modal';
 
 const DeleteConfirmButton = ({
     title,
@@ -45,13 +45,15 @@ const DeleteConfirmButton = ({
                 </IconButton>
             </Tooltip>
 
-            <JoyModal
+            <Modal
                 maxWidth="320px"
                 title={title}
                 isOpen={showModal}
                 onClose={!isLoading ? closeModal : undefined}
             >
-                <Typography>
+                <Typography
+                    sx={{ wordWrap: 'break-word' }}
+                >
                     Are you sure you want to delete{' '}
                     <Typography fontWeight="bold">
                         {itemName}
@@ -62,6 +64,7 @@ const DeleteConfirmButton = ({
                     display="flex"
                     justifyContent="end"
                     gap={1}
+                    mt={2}
                 >
                     <Button
                         color="danger"
@@ -86,7 +89,7 @@ const DeleteConfirmButton = ({
                         Cancel
                     </Button>
                 </Box>
-            </JoyModal>
+            </Modal>
         </>
     );
 }

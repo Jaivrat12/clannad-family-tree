@@ -1,22 +1,24 @@
+import Box from '@mui/joy/Box';
 import Divider from '@mui/joy/Divider';
-import Modal from '@mui/joy/Modal';
+import JoyModal from '@mui/joy/Modal';
 import ModalClose from '@mui/joy/ModalClose';
 import ModalDialog from '@mui/joy/ModalDialog';
 import ModalOverflow from '@mui/joy/ModalOverflow';
 import Typography from '@mui/joy/Typography';
 
-const JoyModal = ({ isOpen, onClose, title, maxWidth, children }) => {
+const Modal = ({
+    isOpen,
+    onClose,
+    title,
+    maxWidth,
+    children,
+}) => {
 
     return (
 
-        <Modal
+        <JoyModal
             open={isOpen}
             onClose={onClose}
-            sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-            }}
         >
             <ModalOverflow>
                 <ModalDialog
@@ -43,17 +45,23 @@ const JoyModal = ({ isOpen, onClose, title, maxWidth, children }) => {
                         />
                     )}
 
-                    <Typography level="title-lg">
-                        {title}
-                    </Typography>
+                    {title && (
+                        <>
+                            <Typography level="title-lg">
+                                {title}
+                            </Typography>
 
-                    <Divider sx={{ my: 1 }} />
+                            <Divider />
+                        </>
+                    )}
 
-                    {children}
+                    <Box>
+                        {children}
+                    </Box>
                 </ModalDialog>
             </ModalOverflow>
-        </Modal>
+        </JoyModal>
     );
 }
 
-export default JoyModal;
+export default Modal;

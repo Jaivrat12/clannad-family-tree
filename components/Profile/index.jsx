@@ -5,14 +5,11 @@ import AvatarGroup from '@mui/joy/AvatarGroup';
 import Box from '@mui/joy/Box';
 import Button from '@mui/joy/Button';
 import Divider from '@mui/joy/Divider';
-import Modal from '@mui/joy/Modal';
-import ModalClose from '@mui/joy/ModalClose';
-import Sheet from '@mui/joy/Sheet';
 import Typography from '@mui/joy/Typography';
 import ProfileActions from './ProfileActions';
 import MemberForm from '../Member/MemberForm';
 import Alert from '../Common/Alert';
-import JoyModal from '../Common/JoyModal';
+import Modal from '../Common/Modal';
 import {
     addMemberChild,
     addMemberSpouse,
@@ -238,7 +235,7 @@ const Profile = ({
                 />
             )}
 
-            <JoyModal
+            <Modal
                 isOpen={formModalOpen}
                 onClose={closeFormModal}
                 title="Edit Member"
@@ -254,242 +251,216 @@ const Profile = ({
                     onSubmit={updateDetails}
                     isLoading={isUpdatingMember}
                 />
-            </JoyModal>
+            </Modal>
 
             <Modal
-                open={open}
+                isOpen={open}
                 onClose={onClose}
-                sx={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                }}
+                maxWidth={320}
             >
-                <Sheet
-                    variant="outlined"
-                    sx={{
-                        maxWidth: 500,
-                        borderRadius: 'md',
-                        p: 3,
-                        boxShadow: 'lg',
-                        outline: 'none',
-                    }}
+                <Box
+                    display="flex"
+                    alignItems="center"
+                    gap={1}
+                    mb={1}
                 >
-                    <ModalClose
-                        variant="outlined"
-                        sx={{
-                            top: 'calc(-1/4 * var(--IconButton-size))',
-                            right: 'calc(-1/4 * var(--IconButton-size))',
-                            boxShadow: '0 2px 12px 0 rgba(0 0 0 / 0.2)',
-                            borderRadius: '50%',
-                            bgcolor: 'background.body',
-                        }}
+                    <Avatar
+                        src={image ?? (gender === 'male'
+                            ? '/members/images/default-male.jpg'
+                            : '/members/images/default-female.jpg'
+                        )}
                     />
+
+                    <Box>
+                        <Typography level="title-lg">
+                            {`${name}`}
+                        </Typography>
+
+                        <Typography
+                            textColor="text.tertiary"
+                            fontSize="small"
+                            fontWeight="lg"
+                        >
+                            {`#${_id}`}
+                        </Typography>
+
+                        <Typography
+                            textColor="text.tertiary"
+                            fontSize="small"
+                        >
+                            {gender[0].toUpperCase() + gender.slice(1)}
+                            {dob && ` | 🎂 ${formateDate(dob)} (${getAge(dob)} years)`}
+                        </Typography>
+                    </Box>
+                </Box>
+
+                {dod && (
+                    <Typography textColor="text.tertiary">
+                        Died on {formateDate(dod)} 💐
+                    </Typography>
+                )}
+
+                {spouse && (
 
                     <Box
                         display="flex"
                         alignItems="center"
                         gap={1}
-                        mb={1}
+                        mt={1}
                     >
-                        <Avatar
-                            src={image ?? (gender === 'male'
-                                ? '/members/images/default-male.jpg'
-                                : '/members/images/default-female.jpg'
-                            )}
-                        />
-
-                        <Box>
-                            <Typography level="title-lg">
-                                {`${name}`}
-                            </Typography>
-
-                            <Typography
-                                textColor="text.tertiary"
-                                fontSize="small"
-                                fontWeight="lg"
-                            >
-                                {`#${_id}`}
-                            </Typography>
-
-                            <Typography
-                                textColor="text.tertiary"
-                                fontSize="small"
-                            >
-                                {gender[0].toUpperCase() + gender.slice(1)}
-                                {dob && ` | 🎂 ${formateDate(dob)} (${getAge(dob)} years)`}
-                            </Typography>
-                        </Box>
-                    </Box>
-
-                    {dod && (
-                        <Typography textColor="text.tertiary">
-                            Died on {formateDate(dod)} 💐
+                        <Typography
+                            textColor="text.tertiary"
+                            fontSize="x-large"
+                        >
+                            💑
                         </Typography>
-                    )}
-
-                    {spouse && (
 
                         <Box
                             display="flex"
                             alignItems="center"
                             gap={1}
-                            mt={1}
                         >
-                            <Typography
-                                textColor="text.tertiary"
-                                fontSize="x-large"
-                            >
-                                💑
-                            </Typography>
+                            <Avatar
+                                src={spouse.image}
+                                onClick={() => setMemberId(spouse._id)}
+                                sx={{ cursor: 'pointer' }}
+                            />
 
-                            <Box
-                                display="flex"
-                                alignItems="center"
-                                gap={1}
-                            >
-                                <Avatar
-                                    src={spouse.image}
-                                    onClick={() => setMemberId(spouse._id)}
-                                    sx={{ cursor: 'pointer' }}
-                                />
+                            <Box>
+                                <Typography fontWeight="lg">
+                                    {spouse.name}
+                                </Typography>
 
-                                <Box>
-                                    <Typography fontWeight="lg">
-                                        {spouse.name}
-                                    </Typography>
+                                <Typography
+                                    textColor="text.tertiary"
+                                    fontSize="small"
+                                    fontWeight="lg"
+                                >
+                                    {`#${spouse._id}`}
+                                </Typography>
 
-                                    <Typography
-                                        textColor="text.tertiary"
-                                        fontSize="small"
-                                        fontWeight="lg"
-                                    >
-                                        {`#${spouse._id}`}
-                                    </Typography>
-
-                                    <Typography
-                                        textColor="text.tertiary"
-                                        fontSize="small"
-                                    >
-                                        {spouse.gender[0].toUpperCase() + spouse.gender.slice(1)}
-                                        {dob && ` | 🎂 ${formateDate(spouse.dob)} (${getAge(spouse.dob)} years)`}
-                                        {/* | 🎂 { formateDate(spouse.dob) }
-                                        {' '}({ getAge(spouse.dob) } years) */}
-                                    </Typography>
-                                </Box>
+                                <Typography
+                                    textColor="text.tertiary"
+                                    fontSize="small"
+                                >
+                                    {spouse.gender[0].toUpperCase() + spouse.gender.slice(1)}
+                                    {dob && ` | 🎂 ${formateDate(spouse.dob)} (${getAge(spouse.dob)} years)`}
+                                    {/* | 🎂 { formateDate(spouse.dob) }
+                                    {' '}({ getAge(spouse.dob) } years) */}
+                                </Typography>
                             </Box>
                         </Box>
-                    )}
-
-                    <Divider sx={{ my: 2 }} />
-
-                    <Box
-                        display="flex"
-                        gap={1}
-                        sx={{ mb: 3 }}
-                    >
-                        <Button
-                            variant="solid"
-                            size="sm"
-                            onClick={openFormModal}
-                            fullWidth
-                        >
-                            Update Details
-                        </Button>
-
-                        <Button
-                            variant="soft"
-                            size="sm"
-                            onClick={!spouse
-                                ? () => setMemberListType('addSpouse')
-                                : removeSpouse
-                            }
-                            loading={isAddingSpouse || isRemovingSpouse}
-                            loadingPosition="start"
-                            fullWidth
-                        >
-                            {!spouse
-                                ? isAddingSpouse ? 'Adding' : 'Add'
-                                : isRemovingSpouse ? 'Removing' : 'Remove'}
-                            {' '}
-                            {genderMap[gender]}
-                        </Button>
                     </Box>
+                )}
 
-                    <Box
-                        sx={{
-                            mb: 1,
-                            textAlign: 'center'
-                        }}
+                <Divider sx={{ my: 2 }} />
+
+                <Box
+                    display="flex"
+                    gap={1}
+                    sx={{ mb: 3 }}
+                >
+                    <Button
+                        variant="solid"
+                        size="sm"
+                        onClick={openFormModal}
+                        fullWidth
                     >
-                        <Typography
-                            level="h6"
-                            fontSize="md"
-                            fontWeight="lg"
-                        >
-                            Children
-                        </Typography>
-                        <AvatarGroup
-                            sx={{
-                                display: 'flex',
-                                justifyContent: 'center'
-                            }}
-                        >
-                            {children.map((child) => (
-                                <Avatar
-                                    key={child._id}
-                                    src={child.image}
-                                    onClick={() => setMemberId(child._id)}
-                                    sx={{ cursor: 'pointer' }}
-                                />
-                            ))}
-                        </AvatarGroup>
-                    </Box>
-
-                    <Box
-                        display="flex"
-                        gap={1}
-                        sx={{ mb: 1 }}
-                    >
-                        <Button
-                            variant="soft"
-                            color="success"
-                            size="sm"
-                            onClick={() => setMemberListType('addChild')}
-                            loading={isAddingChild}
-                            loadingPosition="start"
-                            fullWidth
-                        >
-                            {isAddingChild ? 'Adding' : 'Add'} Child
-                        </Button>
-
-                        <Button
-                            variant="soft"
-                            color="danger"
-                            size="sm"
-                            onClick={() => setMemberListType('removeChild')}
-                            disabled={children.length === 0}
-                            loading={isRemovingChild}
-                            loadingPosition="start"
-                            fullWidth
-                        >
-                            {isRemovingChild ? 'Removing' : 'Remove'} Child
-                        </Button>
-                    </Box>
+                        Update Details
+                    </Button>
 
                     <Button
                         variant="soft"
-                        color={!member.parent ? 'warning' : 'neutral'}
                         size="sm"
-                        onClick={() => setMemberListType('addParent')}
-                        disabled={!!member.parent}
-                        loading={isAddingParent}
+                        onClick={!spouse
+                            ? () => setMemberListType('addSpouse')
+                            : removeSpouse
+                        }
+                        loading={isAddingSpouse || isRemovingSpouse}
                         loadingPosition="start"
                         fullWidth
                     >
-                        {isAddingParent ? 'Adding' : 'Add'} Parent
+                        {!spouse
+                            ? isAddingSpouse ? 'Adding' : 'Add'
+                            : isRemovingSpouse ? 'Removing' : 'Remove'}
+                        {' '}
+                        {genderMap[gender]}
                     </Button>
-                </Sheet>
+                </Box>
+
+                <Box
+                    sx={{
+                        mb: 1,
+                        textAlign: 'center'
+                    }}
+                >
+                    <Typography
+                        level="h6"
+                        fontSize="md"
+                        fontWeight="lg"
+                    >
+                        Children
+                    </Typography>
+                    <AvatarGroup
+                        sx={{
+                            display: 'flex',
+                            justifyContent: 'center'
+                        }}
+                    >
+                        {children.map((child) => (
+                            <Avatar
+                                key={child._id}
+                                src={child.image}
+                                onClick={() => setMemberId(child._id)}
+                                sx={{ cursor: 'pointer' }}
+                            />
+                        ))}
+                    </AvatarGroup>
+                </Box>
+
+                <Box
+                    display="flex"
+                    gap={1}
+                    sx={{ mb: 1 }}
+                >
+                    <Button
+                        variant="soft"
+                        color="success"
+                        size="sm"
+                        onClick={() => setMemberListType('addChild')}
+                        loading={isAddingChild}
+                        loadingPosition="start"
+                        fullWidth
+                    >
+                        {isAddingChild ? 'Adding' : 'Add'} Child
+                    </Button>
+
+                    <Button
+                        variant="soft"
+                        color="danger"
+                        size="sm"
+                        onClick={() => setMemberListType('removeChild')}
+                        disabled={children.length === 0}
+                        loading={isRemovingChild}
+                        loadingPosition="start"
+                        fullWidth
+                    >
+                        {isRemovingChild ? 'Removing' : 'Remove'} Child
+                    </Button>
+                </Box>
+
+                <Button
+                    variant="soft"
+                    color={!member.parent ? 'warning' : 'neutral'}
+                    size="sm"
+                    onClick={() => setMemberListType('addParent')}
+                    disabled={!!member.parent}
+                    loading={isAddingParent}
+                    loadingPosition="start"
+                    fullWidth
+                >
+                    {isAddingParent ? 'Adding' : 'Add'} Parent
+                </Button>
             </Modal>
 
             <ProfileActions
