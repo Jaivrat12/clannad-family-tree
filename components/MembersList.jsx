@@ -4,9 +4,9 @@ import Box from '@mui/joy/Box';
 import Button from '@mui/joy/Button';
 import Chip from '@mui/joy/Chip';
 import Input from '@mui/joy/Input';
+import JoyListItem from '@mui/joy/ListItem';
 import ListDivider from '@mui/joy/ListDivider';
 import List from '@mui/joy/List';
-import ListItem from '@mui/joy/ListItem';
 import ListItemButton from '@mui/joy/ListItemButton';
 import ListItemContent from '@mui/joy/ListItemContent';
 import ListItemDecorator from '@mui/joy/ListItemDecorator';
@@ -81,6 +81,21 @@ const MembersList = ({
         }
     };
 
+    const ListItem = ({ member, children }) => onClick ? (
+        <JoyListItem>
+            <ListItemButton
+                onClick={() => onClick(member)}
+                sx={{ py: 1 }}
+            >
+                {children}
+            </ListItemButton>
+        </JoyListItem>
+    ) : (
+        <JoyListItem sx={{ py: 1 }}>
+            {children}
+        </JoyListItem>
+    );
+
     return (
 
         <>
@@ -115,6 +130,7 @@ const MembersList = ({
                     <Box>
                         <Input
                             placeholder="Search for members..."
+                            type="search"
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                             autoFocus
@@ -159,7 +175,7 @@ const MembersList = ({
                             </RadioGroup>
                         )}
 
-                        <Typography level="title-sm">
+                        <Typography level="title-sm" mb={1}>
                             Showing {filteredMembers.length} member{filteredMembers.length !== 1 && 's'}
                         </Typography>
                     </Box>
@@ -226,22 +242,23 @@ const MembersList = ({
                             {filteredMembers.map((member, i) => (
 
                                 <Fragment key={member._id}>
-                                    <ListItem>
-                                        <ListItemButton onClick={() => onClick(member)}>
-                                            <ListItemDecorator sx={{ alignSelf: 'flex-start' }}>
-                                                <Avatar src={member.image} />
-                                            </ListItemDecorator>
+                                    <ListItem member={member}>
+                                        <ListItemDecorator sx={{ alignSelf: 'flex-start' }}>
+                                            <Avatar src={member.image} />
+                                        </ListItemDecorator>
 
-                                            <ListItemContent>
-                                                <Typography level="title-md">
-                                                    {member.name}
-                                                </Typography>
-                                            </ListItemContent>
-                                        </ListItemButton>
+                                        <ListItemContent>
+                                            <Typography level="title-md">
+                                                {member.name}
+                                            </Typography>
+                                        </ListItemContent>
                                     </ListItem>
 
                                     {filteredMembers.length - 1 > i && (
-                                        <ListDivider inset="startContent" />
+                                        <ListDivider
+                                            inset="startContent"
+                                            sx={{ my: 0 }}
+                                        />
                                     )}
                                 </Fragment>
                             ))}

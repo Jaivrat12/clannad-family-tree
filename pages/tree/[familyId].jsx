@@ -122,7 +122,7 @@ export default function FamilyTree() {
 			data: denormalize(family.data.members ?? []),
 		},
 	};
-	const [memberCategory, setMemberCategory] = useState('workspace');
+	const [memberCategory, setMemberCategory] = useState('family');
 	const members = memberCategories[memberCategory].data;
 
 	const [dimensions, translate, containerRef] = useCenteredTree();
@@ -287,7 +287,9 @@ export default function FamilyTree() {
 						<MembersList
 							title={`Members (${members.length})`}
 							members={members}
-							onClick={(member) => setMemberId(member._id)}
+							onClick={memberCategory === 'family' && ((member) => {
+								setMemberId(member._id);
+							})}
 							workspaceId={workspaceData.workspaces[0]._id}
 							memberCategory={memberCategory}
 							setMemberCategory={setMemberCategory}
