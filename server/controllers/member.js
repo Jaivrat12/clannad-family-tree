@@ -166,6 +166,7 @@ const addSpouse = async (req, res) => {
             parents,
         } = spouseDescendants;
 
+        delete nuclearFamilies[spouseNfId];
         [nuclearFamily, spouseParent].forEach((nf) => {
             if (nf) {
                 nuclearFamilies[nf._id] = nf;

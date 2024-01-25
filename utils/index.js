@@ -4,6 +4,8 @@ export const getFamilyTree = (data) => {
     const getMember = (id) => data.members[id];
     const getNuclearFamily = (id) => data.nuclearFamilies[id];
 
+    let members, nuclearFamilies;
+
     const helper = (id, parentId) => {
 
         if (!id) {
@@ -13,6 +15,14 @@ export const getFamilyTree = (data) => {
         const nuclearFamily = getNuclearFamily(id);
         const male = getMember(nuclearFamily.male);
         const female = getMember(nuclearFamily.female);
+
+        nuclearFamilies[id] = nuclearFamily;
+        if (male) {
+            members[male._id] = male;
+        }
+        if (female) {
+            members[female._id] = female;
+        }
 
         let member = null;
         if (male && isRoot(male)) {
@@ -35,7 +45,13 @@ export const getFamilyTree = (data) => {
     };
 
     const _getFamilyTree = (root) => {
-        return helper(root?.nuclearFamily, null);
+        members = {};
+        nuclearFamilies = {};
+        return {
+            tree: helper(root?.nuclearFamily, null),
+            members,
+            nuclearFamilies,
+        };
     };
 
     return _getFamilyTree;

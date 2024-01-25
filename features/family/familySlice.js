@@ -13,6 +13,15 @@ const initialState = {
     tree: {},
 };
 
+const updateFamilyState = (state) => {
+
+    // TODO: Optimize this
+    const { tree, members, nuclearFamilies } = getFamilyTree(state.data)(state.data.root);
+    state.tree = tree;
+    state.data.members = members;
+    state.data.nuclearFamilies = nuclearFamilies;
+};
+
 // TODO: update reducers => updateMembers(), updateFamilyTree(), etc.
 export const familySlice = createSlice({
     name: 'family',
@@ -22,7 +31,8 @@ export const familySlice = createSlice({
 
             state.data = action.payload.data;
             if (state.data) {
-                state.tree = getFamilyTree(state.data)(state.data?.root);
+                const { tree } = getFamilyTree(state.data)(state.data?.root);
+                state.tree = tree;
             }
         },
         updateMemberDetails: (state, action) => {
@@ -44,22 +54,19 @@ export const familySlice = createSlice({
                 ...nuclearFamilies,
             };
 
-            // TODO: Optimize this
-            state.tree = getFamilyTree(state.data)(state.data.root);
+            updateFamilyState(state);
         },
         removeMemberSpouse: (state, action) => {
 
             const { spouse, nuclearFamilies } = action.payload;
-            const { members } = state.data;
 
             state.data.nuclearFamilies = {
                 ...state.data.nuclearFamilies,
                 ...nuclearFamilies,
             };
-            members[spouse._id] = spouse;
+            state.data.members[spouse._id] = spouse;
 
-            // TODO: Optimize this
-            state.tree = getFamilyTree(state.data)(state.data.root);
+            updateFamilyState(state);
         },
         addMemberChildren: (state, action) => {
 
@@ -79,24 +86,15 @@ export const familySlice = createSlice({
                 state.data.root = families[state.data._id].root;
             }
 
-            // parents[childId] = member._id;
-
-            // TODO: Optimize this
-            state.tree = getFamilyTree(state.data)(state.data.root);
+            updateFamilyState(state);
         },
         removeMemberChildren: (state, action) => {
 
-            const { childId, nuclearFamily } = action.payload;
-            const { members, nuclearFamilies } = state.data;
-
+            const { nuclearFamily } = action.payload;
+            const { nuclearFamilies } = state.data;
             nuclearFamilies[nuclearFamily._id] = nuclearFamily;
-            // ? deleting child is not good if it's a spouse in the family, maybe move it to workspace list
-            // delete members[childId];
 
-            // delete parents[childId];
-
-            // TODO: Optimize this
-            state.tree = getFamilyTree(state.data)(state.data.root);
+            updateFamilyState(state);
         },
     },
 });
@@ -248,7 +246,6 @@ export const removeMemberChild = (childId, onSuccess, onError, onFinally) => asy
         if (data.success) {
 
             const payload = {
-                childId,
                 nuclearFamily: data.nuclearFamily,
             };
             dispatch(familySlice.actions.removeMemberChildren(payload));
