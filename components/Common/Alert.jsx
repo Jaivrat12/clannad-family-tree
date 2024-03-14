@@ -3,22 +3,35 @@ import IconButton from '@mui/joy/IconButton';
 import Snackbar from '@mui/joy/Snackbar';
 import CloseIcon from '@mui/icons-material/Close';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 
 const Alert = ({
     msg,
     severity,
     autoHide = false,
+    endDecoratorIcon = <CloseIcon />,
+    onEndDecoratorClick,
 }) => {
 
-    const isSuccess = severity === 'success';
+    const severityToColor = {
+        success: 'success',
+        error: 'danger',
+        info: 'primary',
+    }
+    const severityToIcon = {
+        success: <TaskAltIcon />,
+        error: <ErrorOutlineIcon />,
+        info: <InfoOutlinedIcon />,
+    }
     const { color, startIcon } = {
-        color: isSuccess ? 'success' : 'danger',
-        startIcon: isSuccess ? <TaskAltIcon /> : <ErrorOutlineIcon />,
+        color: severityToColor[severity],
+        startIcon: severityToIcon[severity],
     };
 
     const [isOpen, setIsOpen] = useState(true);
-    const onClose = () => setIsOpen(false);
+    const onClose = () => severity !== 'error' && setIsOpen(false);
+    const onEndDecoratorBtnClick = onEndDecoratorClick ?? (() => setIsOpen(false));
 
     return (
 
@@ -36,10 +49,10 @@ const Alert = ({
             endDecorator={(
                 <IconButton
                     color={color}
-                    onClick={onClose}
+                    onClick={onEndDecoratorBtnClick}
                     sx={{ borderRadius: '50%' }}
                 >
-                    <CloseIcon />
+                    {endDecoratorIcon}
                 </IconButton>
             )}
         >

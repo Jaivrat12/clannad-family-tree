@@ -11,6 +11,7 @@ import Tooltip from '@mui/joy/Tooltip';
 import Typography from '@mui/joy/Typography';
 import AddIcon from '@mui/icons-material/Add';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import WorkspaceCard from 'components/WorkspaceCard';
 import WorkspaceForm from 'components/Workspace/WorkspaceForm';
 import Alert from 'components/Common/Alert';
@@ -39,6 +40,7 @@ export default function Home() {
 
 	const {
 		data: workspacesData,
+		isLoading: isLoadingWorkspaces,
 		isFetching: isFetchingWorkspaces,
 		isSuccess: isWorkspacesSuccess,
 		error: workspacesError,
@@ -129,10 +131,19 @@ export default function Home() {
 				/>
 			)}
 
+			{isLoadingWorkspaces && (
+				<Alert
+					msg="Please wait patiently as free-tier servers prefer to sleep when inactive 😅"
+					severity="info"
+				/>
+			)}
+
 			{workspacesError && (
 				<Alert
-					msg="Something went wrong"
+					msg="Something went wrong! Please try again..."
 					severity="error"
+					endDecoratorIcon={<RefreshIcon />}
+					onEndDecoratorClick={() => location.reload()}
 				/>
 			)}
 
