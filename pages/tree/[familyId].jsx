@@ -323,7 +323,6 @@ export default function FamilyTree() {
 
 						<Workspace
 							workspace={workspaceData.workspaces[0]}
-							currFamilyId={familyId}
 							open={workspaceModalOpen}
 							onClose={() => setWorkspaceModalOpen(false)}
 						/>

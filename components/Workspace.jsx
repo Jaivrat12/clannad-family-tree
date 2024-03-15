@@ -23,9 +23,16 @@ import {
     useUpdateFamilyMutation,
 } from 'services/workspace';
 
-const Workspace = ({ workspace, currFamilyId, open, onClose }) => {
+const Workspace = ({
+    workspace,
+    open,
+    onClose,
+    readOnly = false,
+}) => {
 
     const router = useRouter();
+	const { familyId } = router.query;
+
     const [family, setFamily] = useState(null);
 
     const [formModalOpen, setFormModalOpen] = useState(false);
@@ -161,7 +168,7 @@ const Workspace = ({ workspace, currFamilyId, open, onClose }) => {
                                 <ListItemButton
                                     component={Link}
                                     href={`/tree/${family._id}`}
-                                    selected={currFamilyId === family._id}
+                                    selected={familyId === family._id}
                                     onClick={onClose}
                                 >
                                     <ListItemDecorator>
@@ -209,34 +216,36 @@ const Workspace = ({ workspace, currFamilyId, open, onClose }) => {
                                                 </Box>
                                             </Tooltip>
 
-                                            <Box
-                                                display="flex"
-                                                gap={1}
-                                            >
-                                                <Tooltip title="Edit Family">
-                                                    <IconButton
-                                                        color="primary"
-                                                        variant="soft"
-                                                        size="sm"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            e.preventDefault();
-                                                            openFormModal(family);
-                                                        }}
-                                                    >
-                                                        <EditIcon />
-                                                    </IconButton>
-                                                </Tooltip>
+                                            {!readOnly && (
+                                                <Box
+                                                    display="flex"
+                                                    gap={1}
+                                                >
+                                                    <Tooltip title="Edit Family">
+                                                        <IconButton
+                                                            color="primary"
+                                                            variant="soft"
+                                                            size="sm"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                e.preventDefault();
+                                                                openFormModal(family);
+                                                            }}
+                                                        >
+                                                            <EditIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
 
-                                                <DeleteConfirmButton
-                                                    title="Delete Family"
-                                                    itemName={family.name}
-                                                    onConfirm={() => handleDelete(family._id)}
-                                                    isLoading={isDeletingFamily}
-                                                    preventDefault
-                                                    stopPropagation
-                                                />
-                                            </Box>
+                                                    <DeleteConfirmButton
+                                                        title="Delete Family"
+                                                        itemName={family.name}
+                                                        onConfirm={() => handleDelete(family._id)}
+                                                        isLoading={isDeletingFamily}
+                                                        preventDefault
+                                                        stopPropagation
+                                                    />
+                                                </Box>
+                                            )}
                                         </Box>
                                     </ListItemContent>
                                 </ListItemButton>
@@ -249,13 +258,15 @@ const Workspace = ({ workspace, currFamilyId, open, onClose }) => {
                     </Typography>
                 )}
 
-                <Button
-                    onClick={() => openFormModal()}
-                    fullWidth
-                    sx={{ mt: 2 }}
-                >
-                    New Family
-                </Button>
+                {!readOnly && (
+                    <Button
+                        onClick={() => openFormModal()}
+                        fullWidth
+                        sx={{ mt: 2 }}
+                    >
+                        New Family
+                    </Button>
+                )}
             </Modal>
         </>
     );

@@ -16,7 +16,13 @@ import '@fontsource/quicksand';
 import '@fontsource/work-sans';
 import '@fontsource/public-sans';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+	defaultOptions: {
+		queries: {
+			refetchOnWindowFocus: false,
+		},
+	},
+});
 
 export default function App({ Component, pageProps: { session, ...pageProps } }) {
 

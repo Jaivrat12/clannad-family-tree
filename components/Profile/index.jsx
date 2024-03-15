@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 import Avatar from '@mui/joy/Avatar';
 import AvatarGroup from '@mui/joy/AvatarGroup';
 import Box from '@mui/joy/Box';
@@ -8,6 +10,7 @@ import Divider from '@mui/joy/Divider';
 import Typography from '@mui/joy/Typography';
 import ProfileActions from './ProfileActions';
 import MemberForm from '../Member/MemberForm';
+import Workspace from '../Workspace';
 import Alert from '../Common/Alert';
 import Modal from '../Common/Modal';
 import {
@@ -25,6 +28,8 @@ const genderMap = {
     male: 'Wife',
     female: 'Husband',
 };
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 /**
  * @typedef {Object} Attributes
@@ -76,6 +81,25 @@ const Profile = ({
     const [formModalOpen, setFormModalOpen] = useState(false);
     const openFormModal = () => setFormModalOpen(true);
     const closeFormModal = () => setFormModalOpen(false);
+
+    const [familiesModalOpen, setFamiliesModalOpen] = useState(false);
+    const openFamiliesModal = () => setFamiliesModalOpen(true);
+    const closeFamiliesModal = () => setFamiliesModalOpen(false);
+
+	const {
+        data: families,
+        isFetching: isFamiliesFetching,
+    } = useQuery({
+		queryKey: [`${_id}-families`],
+		queryFn: () => axios.get(`${BASE_URL}/members/${_id}/families`, {
+			withCredentials: true,
+		}),
+		select: (res) => {
+			const { success, data } = res.data;
+			return success ? data : null;
+		},
+        enabled: familiesModalOpen,
+	});
 
     const [memberListType, setMemberListType] = useState('');
     const closeMembersList = () => setMemberListType('');
@@ -458,10 +482,33 @@ const Profile = ({
                     loading={isAddingParent}
                     loadingPosition="start"
                     fullWidth
+                    sx={{ mb: 2 }}
                 >
                     {isAddingParent ? 'Adding' : 'Add'} Parent
                 </Button>
+
+                <Button
+                    size="sm"
+                    onClick={openFamiliesModal}
+                    loading={isFamiliesFetching}
+                    loadingPosition="start"
+                    fullWidth
+                >
+                    Show All Families
+                </Button>
             </Modal>
+
+            {families && (
+                <Workspace
+                    workspace={{
+                        name: `${member.name}'s`,
+                        families,
+                    }}
+                    open={!isFamiliesFetching && familiesModalOpen}
+                    onClose={closeFamiliesModal}
+                    readOnly
+                />
+            )}
 
             <ProfileActions
                 workspaceId={workspaceId}

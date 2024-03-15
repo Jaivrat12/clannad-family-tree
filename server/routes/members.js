@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const {
     getMember,
+    getMemberFamilies,
     // createMember,
     updateMember,
     addSpouse,
@@ -13,6 +14,7 @@ const { checkOwnership } = require('../middlewares/auth');
 const router = Router();
 
 router.get('/:memberId', checkOwnership, getMember);
+router.get('/:memberId/families', checkOwnership, getMemberFamilies);
 // router.post('/', createMember);
 router.put('/:memberId', checkOwnership, updateMember);
 

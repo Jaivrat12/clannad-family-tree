@@ -13,11 +13,11 @@ const getDescendants = async (root) => {
 
     const filter = { _id: new mongoose.Types.ObjectId(root) };
     const graphLookupQuery = {
-        from: "nuclearfamilies",
-        startWith: "$_id",
-        connectFromField: "children",
-        connectToField: "_id",
-        as: "nuclearFamilies",
+        from: 'nuclearfamilies',
+        startWith: '$_id',
+        connectFromField: 'children',
+        connectToField: '_id',
+        as: 'nuclearFamilies',
     };
 
     const result = await NuclearFamily.aggregate([

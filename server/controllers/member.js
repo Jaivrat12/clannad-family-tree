@@ -17,6 +17,51 @@ const getMember = async (req, res) => {
     }
 };
 
+const getMemberFamilies = async (req, res) => {
+
+    const { memberId } = req.params;
+
+    try {
+
+        const member = await Member.findById(memberId).select('workspace');
+        const _members = await Member
+            .find({ workspace: member.workspace })
+            .populate('parent')
+            .select('parent');
+
+        const members = {};
+        _members.forEach((member) => members[member._id] = member);
+
+        const roots = new Set();
+        const storeAllRoots = (_id) => {
+
+            if (!_id) return;
+
+            if (!members[_id].parent) {
+                roots.add(members[_id]);
+                return;
+            }
+
+            const { male, female } = members[_id].parent;
+            storeAllRoots(male);
+            storeAllRoots(female);
+        };
+        storeAllRoots(member._id);
+
+        const families = await Family.find({
+            root: { $in: [...roots] }
+        }).populate('root');
+
+        res.status(200).json({ success: true, data: families });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            error: 'Something went wrong',
+        });
+    }
+};
+
 const createMember = async (req, res) => {
 
     const data = req.body;
@@ -392,6 +437,7 @@ const removeChild = async (req, res) => {
 
 module.exports = {
     getMember,
+    getMemberFamilies,
     createMember,
     updateMember,
     addSpouse,
