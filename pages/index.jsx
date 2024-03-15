@@ -1,16 +1,26 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
+import axios from 'axios';
 import Avatar from '@mui/joy/Avatar';
+import Badge from '@mui/joy/Badge';
 import Box from '@mui/joy/Box';
 import Button from '@mui/joy/Button';
+import Chip from '@mui/joy/Chip';
 import Container from '@mui/joy/Container';
 import IconButton from '@mui/joy/IconButton';
+import List from '@mui/joy/List';
+import ListItem from '@mui/joy/ListItem';
+import ListItemButton from '@mui/joy/ListItemButton';
+import ListItemContent from '@mui/joy/ListItemContent';
+import ListItemDecorator from '@mui/joy/ListItemDecorator';
 import Tooltip from '@mui/joy/Tooltip';
 import Typography from '@mui/joy/Typography';
 import AddIcon from '@mui/icons-material/Add';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import PersonIcon from '@mui/icons-material/Person';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import WorkspaceCard from 'components/WorkspaceCard';
 import WorkspaceForm from 'components/Workspace/WorkspaceForm';
@@ -32,6 +42,8 @@ import {
  * 	* Siblings marriage 💀
 */
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+
 Home.title = 'Home';
 export default function Home() {
 
@@ -40,13 +52,45 @@ export default function Home() {
 
 	const {
 		data: workspacesData,
-		isLoading: isLoadingWorkspaces,
 		isFetching: isFetchingWorkspaces,
 		isSuccess: isWorkspacesSuccess,
 		error: workspacesError,
-	} = useGetWorkspacesQuery();
+	} = useGetWorkspacesQuery({
+		own: true,				// a flag to only get god's own workspaces (because god can see everything :p)
+	});
 	const workspaces = workspacesData?.workspaces;
 	const [workspace, setWorkspace] = useState(null);
+
+	const { data: users } = useQuery({
+		queryKey: ['users'],
+		queryFn: () => axios.get(`${BASE_URL}/god/users`, {
+			withCredentials: true,
+		}),
+		select: (res) => {
+			const { success, users } = res.data;
+			return success ? users : null;
+		},
+	});
+	const isUsersFetchSuccess = users?.length > 0;
+	const [usersModalOpen, setUsersModalOpen] = useState(false);
+
+	const [currUser, setCurrUser] = useState(null);
+	const {
+		data: currUserWorkspaces,
+		isFetching: isFetchingCurrUserWorkspaces,
+		isSuccess: isCurrUserWorkspacesSuccess,
+		error: currUserWorkspacesError,
+	} = useQuery({
+		queryKey: [`user-${currUser?._id}-workspaces`],
+		queryFn: () => axios.get(`${BASE_URL}/god/workspaces/${currUser?._id}`, {
+			withCredentials: true,
+		}),
+		select: (res) => {
+			const { success, workspaces } = res.data;
+			return success ? workspaces : null;
+		},
+		enabled: !!currUser?._id,
+	});
 
 	const [formModalOpen, setFormModalOpen] = useState(false);
 	const openFormModal = (workspace) => {
@@ -131,7 +175,7 @@ export default function Home() {
 				/>
 			)}
 
-			{isLoadingWorkspaces && (
+			{isFetchingWorkspaces && (
 				<Alert
 					msg="Please wait patiently as free-tier servers prefer to sleep when inactive 😅"
 					severity="info"
@@ -160,6 +204,91 @@ export default function Home() {
 					isLoading={isCreatingWorkspace || isUpdatingWorkspace}
 				/>
 			</Modal>
+
+			{users && (
+				<Modal
+					title={`View All Users (${users.length})`}
+					isOpen={usersModalOpen}
+					onClose={() => setUsersModalOpen(false)}
+					maxWidth="sm"
+					contentScrollY
+				>
+					<List>
+						{users.map((user) => (
+							<ListItem key={user._id}>
+								<ListItemButton onClick={() => setCurrUser(user)}>
+									<ListItemDecorator>
+										<PersonIcon />
+									</ListItemDecorator>
+									<ListItemContent>
+										<Typography
+											fontWeight="500"
+											textOverflow="ellipsis"
+											overflow="hidden"
+											whiteSpace="nowrap"
+										>
+											{user.email.split('@')[0]}
+										</Typography>
+
+										<Typography
+											color="neutral"
+											fontSize="small"
+											sx={{ wordBreak: 'break-all' }}
+											gutterBottom
+										>
+											{user.email}
+										</Typography>
+
+										{user.isGod && (
+											<Chip variant="soft" color="success">
+												GOD
+											</Chip>
+										)}
+									</ListItemContent>
+								</ListItemButton>
+							</ListItem>
+						))}
+					</List>
+				</Modal>
+			)}
+
+			{currUser && (
+				<Modal
+					title={`${currUser.email.split('@')[0]}'s Workspaces`}
+					isOpen={true}
+					onClose={() => setCurrUser(null)}
+					maxWidth="md"
+					contentScrollY
+				>
+					{currUserWorkspaces?.length || isFetchingCurrUserWorkspaces ? (currUserWorkspaces ?? Array(3).fill({})).map((workspace, i) => (
+
+						<Box
+							key={workspace._id ?? i}
+							mb={2}
+						>
+							<WorkspaceCard
+								workspace={workspace}
+								openFormModal={openFormModal}
+								isLoading={isFetchingCurrUserWorkspaces}
+							/>
+						</Box>
+					)) : (
+						<Typography
+							fontStyle="italic"
+							textAlign="center"
+							marginTop={4}
+						>
+							{currUserWorkspacesError ? (
+								'Something wen\'t wrong... Couldn\'t load your workspaces'
+							) : isCurrUserWorkspacesSuccess && (
+								<>
+									The user doesn&apos;t have any Workspaces.
+								</>
+							)}
+						</Typography>
+					)}
+				</Modal>
+			)}
 
 			<Box
 				sx={{
@@ -195,7 +324,19 @@ export default function Home() {
 							</>
 						)}
 					>
-						<Avatar src={session.user.image} />
+						<Badge
+							badgeContent={users?.length ?? 0}
+							color="success"
+							size="sm"
+						>
+							<Avatar
+								src={session.user.image}
+								{...(isUsersFetchSuccess && {
+									onClick: () => setUsersModalOpen(true),
+									sx: { cursor: 'pointer' }
+								})}
+							/>
+						</Badge>
 					</Tooltip>
 
 					<ThemeToggleButton />

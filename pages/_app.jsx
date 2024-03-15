@@ -1,6 +1,10 @@
 import Head from 'next/head';
 import { useEffect } from 'react';
 import { Provider } from 'react-redux';
+import {
+	QueryClient,
+	QueryClientProvider,
+} from '@tanstack/react-query';
 import { SessionProvider } from 'next-auth/react';
 import { CssVarsProvider } from '@mui/joy/styles';
 import CssBaseline from '@mui/joy/CssBaseline';
@@ -8,10 +12,11 @@ import clannadTheme from '../utils/theme';
 import { store } from '../app/store';
 
 import '../styles/globals.css';
-
 import '@fontsource/quicksand';
 import '@fontsource/work-sans';
 import '@fontsource/public-sans';
+
+const queryClient = new QueryClient();
 
 export default function App({ Component, pageProps: { session, ...pageProps } }) {
 
@@ -57,7 +62,9 @@ export default function App({ Component, pageProps: { session, ...pageProps } })
 
 			<Provider store={store}>
 				<SessionProvider session={session}>
-					<Component {...pageProps} />
+					<QueryClientProvider client={queryClient}>
+						<Component {...pageProps} />
+					</QueryClientProvider>
 				</SessionProvider>
 			</Provider>
 		</CssVarsProvider>

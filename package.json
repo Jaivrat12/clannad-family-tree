@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "start": "next start",
-    "all": "concurrently \"npm run dev\" \"npm run dev --prefix server\"",
+    "all": "concurrently \"npm run dev\" \"npm run server\"",
     "dev": "next dev",
+    "server": "npm run dev --prefix server",
     "build": "next build",
     "test": "jest --watch",
     "lint": "next lint"
@@ -21,6 +22,7 @@
     "@mui/joy": "^5.0.0-beta.21",
     "@next/font": "13.0.7",
     "@reduxjs/toolkit": "^1.9.3",
+    "@tanstack/react-query": "^5.28.0",
     "axios": "^1.2.2",
     "dayjs": "^1.11.10",
     "next": "^13.1.2",

@@ -40,6 +40,11 @@ const isAuth = async (req, res, next) => {
 // authorization
 const checkOwnership = async (req, res, next) => {
 
+    if (req.user.isGod) {
+        next();
+        return;
+    }
+
     const isWorkspaceOwner = async (id) => {
         const workspace = await Workspace.findById(id).populate('owner');
         return workspace.owner.email === req.user.email;
@@ -94,14 +99,29 @@ const checkOwnership = async (req, res, next) => {
         next();
     } catch (err) {
 
-        res.status(401).json({
+        res.status(403).json({
             success: false,
             error: 'Unauthorized Access!',
         });
     }
 };
 
+// god's authorization
+const isGod = async (req, res, next) => {
+
+    if (req.user.isGod) {
+        next();
+        return;
+    }
+
+    res.status(403).json({
+        success: false,
+        error: 'Sorry, but you aren\'t a "GOD"...',
+    });
+};
+
 module.exports = {
     isAuth,
     checkOwnership,
+    isGod,
 };

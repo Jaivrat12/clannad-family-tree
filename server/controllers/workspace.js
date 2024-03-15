@@ -7,10 +7,12 @@ const { uploadImage, deleteImageFolder } = require('../utils/cloudinary');
 
 const getWorkspaces = async (req, res) => {
 
-    const { family } = req.query;
-    const query = {
-        owner: req.user._id,
-    };
+    // `own` is a flag to only get god's own workspaces (because god can see everything :p)
+    const { family, own } = req.query;
+    const query = {};
+    if (!req.user.isGod || own) {
+        query.owner = req.user._id;
+    }
     if (family) {
         query.families = family;
     }

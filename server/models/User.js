@@ -5,6 +5,11 @@ const UserSchema = new mongoose.Schema({
 		type: String,
 		required: true,
 	},
+	isGod: {
+		type: Boolean,
+		default: false,
+		immutable: true,
+	}
 });
 
 module.exports = mongoose.model('User', UserSchema);

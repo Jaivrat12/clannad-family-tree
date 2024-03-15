@@ -11,7 +11,10 @@ export const workspaceApi = createApi({
     tagTypes: ['Workspace', 'Family', 'Member'],
     endpoints: (builder) => ({
         getWorkspaces: builder.query({
-            query: () => ``,
+            query: (params) => ({
+                url: ``,
+                params,
+            }),
             providesTags: ['Workspace', 'Family'],
         }),
         createWorkspace: builder.mutation({
