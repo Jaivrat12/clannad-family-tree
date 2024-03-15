@@ -30,7 +30,6 @@ const Alert = ({
     };
 
     const [isOpen, setIsOpen] = useState(true);
-    const onClose = () => severity !== 'error' && setIsOpen(false);
     const onEndDecoratorBtnClick = onEndDecoratorClick ?? (() => setIsOpen(false));
 
     return (
@@ -39,7 +38,11 @@ const Alert = ({
             color={color}
             variant="soft"
             open={isOpen}
-            onClose={onClose}
+            onClose={(_, reason) => {
+                if (autoHide && reason === 'timeout') {
+                    setIsOpen(false);
+                }
+            }}
             autoHideDuration={autoHide ? 3000 : null}
             anchorOrigin={{
                 vertical: 'top',

@@ -255,7 +255,7 @@ const Profile = ({
                 <Alert
                     msg={alertState.msg}
                     severity={alertState.severity}
-                    autoHide
+                    autoHide={alertState.severity === 'success'}
                 />
             )}
 
