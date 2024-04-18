@@ -41,8 +41,8 @@ const Node = ({ id, onClick }) => {
 
 						<Avatar
 							src={spouse.image ?? (spouse.gender === 'male'
-								? '/members/images/default-male.jpg'
-								: '/members/images/default-female.jpg'
+								? '/members/images/default-male.png'
+								: '/members/images/default-female.png'
 							)}
 							alt={spouse.name}
 							onClick={() => onClick(spouse._id)}
@@ -57,8 +57,8 @@ const Node = ({ id, onClick }) => {
 
 					<Avatar
 						src={member.image ?? (member.gender === 'male'
-							? '/members/images/default-male.jpg'
-							: '/members/images/default-female.jpg'
+							? '/members/images/default-male.png'
+							: '/members/images/default-female.png'
 						)}
 						alt={member.name}
 						onClick={() => onClick(id)}

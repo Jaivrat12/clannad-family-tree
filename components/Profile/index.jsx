@@ -290,8 +290,8 @@ const Profile = ({
                 >
                     <Avatar
                         src={image ?? (gender === 'male'
-                            ? '/members/images/default-male.jpg'
-                            : '/members/images/default-female.jpg'
+                            ? '/members/images/default-male.png'
+                            : '/members/images/default-female.png'
                         )}
                     />
 

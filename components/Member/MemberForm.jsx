@@ -111,8 +111,8 @@ const MemberForm = ({ mode, data, onSubmit, isLoading }) => {
         }
 
         const image = watchGender === 'male'
-            ? '/members/images/default-male.jpg'
-            : '/members/images/default-female.jpg'
+            ? '/members/images/default-male.png'
+            : '/members/images/default-female.png'
         setPreview(image);
     }, [data?.image, dataImageLost, preview, watchGender, watchImage]);
 
