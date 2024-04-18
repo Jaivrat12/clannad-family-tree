@@ -172,7 +172,12 @@ const Workspace = ({
                                     onClick={onClose}
                                 >
                                     <ListItemDecorator>
-                                        <Avatar src={family.root?.image} />
+                                        <Avatar
+                                            src={family.root?.image ?? (family.root ? (family.root.gender === 'male'
+                                                ? '/members/images/default-male.png'
+                                                : '/members/images/default-female.png'
+                                            ) : '')}
+                                        />
                                     </ListItemDecorator>
 
                                     <ListItemContent>

@@ -244,7 +244,12 @@ const MembersList = ({
                                 <Fragment key={member._id}>
                                     <ListItem member={member}>
                                         <ListItemDecorator sx={{ alignSelf: 'flex-start' }}>
-                                            <Avatar src={member.image} />
+                                            <Avatar
+                                                src={member.image ?? (member.gender === 'male'
+                                                    ? '/members/images/default-male.png'
+                                                    : '/members/images/default-female.png'
+                                                )}
+                                            />
                                         </ListItemDecorator>
 
                                         <ListItemContent>

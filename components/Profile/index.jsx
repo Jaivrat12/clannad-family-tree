@@ -345,7 +345,10 @@ const Profile = ({
                             gap={1}
                         >
                             <Avatar
-                                src={spouse.image}
+                                src={spouse.image ?? (spouse.gender === 'male'
+                                    ? '/members/images/default-male.png'
+                                    : '/members/images/default-female.png'
+                                )}
                                 onClick={() => setMemberId(spouse._id)}
                                 sx={{ cursor: 'pointer' }}
                             />
@@ -434,7 +437,10 @@ const Profile = ({
                         {children.map((child) => (
                             <Avatar
                                 key={child._id}
-                                src={child.image}
+                                src={child.image ?? (child.gender === 'male'
+                                    ? '/members/images/default-male.png'
+                                    : '/members/images/default-female.png'
+                                )}
                                 onClick={() => setMemberId(child._id)}
                                 sx={{ cursor: 'pointer' }}
                             />
