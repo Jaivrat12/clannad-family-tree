@@ -8,6 +8,7 @@ import Box from '@mui/joy/Box';
 import Button from '@mui/joy/Button';
 import Divider from '@mui/joy/Divider';
 import Typography from '@mui/joy/Typography';
+import BasicProfileInfo from './BasicProfileInfo';
 import ProfileActions from './ProfileActions';
 import MemberForm from '../Member/MemberForm';
 import Workspace from '../Workspace';
@@ -70,13 +71,7 @@ const Profile = ({
     const spouse = useSelector(selectSpouse(memberId));
     const children = useSelector(selectChildren(memberId));
 
-    const { _id, name, image, gender, dob, dod } = member;
-    const formatter = Intl.DateTimeFormat('en-US', {
-        dateStyle: 'medium'
-    });
-
-    const formateDate = (date) => formatter.format(new Date(date));
-    const getAge = (dob) => new Date().getFullYear() - new Date(dob).getFullYear();
+    const { _id, gender } = member;
 
     const [formModalOpen, setFormModalOpen] = useState(false);
     const openFormModal = () => setFormModalOpen(true);
@@ -86,20 +81,20 @@ const Profile = ({
     const openFamiliesModal = () => setFamiliesModalOpen(true);
     const closeFamiliesModal = () => setFamiliesModalOpen(false);
 
-	const {
+    const {
         data: families,
         isFetching: isFamiliesFetching,
     } = useQuery({
-		queryKey: [`${_id}-families`],
-		queryFn: () => axios.get(`${BASE_URL}/members/${_id}/families`, {
-			withCredentials: true,
-		}),
-		select: (res) => {
-			const { success, data } = res.data;
-			return success ? data : null;
-		},
+        queryKey: [`${_id}-families`],
+        queryFn: () => axios.get(`${BASE_URL}/members/${_id}/families`, {
+            withCredentials: true,
+        }),
+        select: (res) => {
+            const { success, data } = res.data;
+            return success ? data : null;
+        },
         enabled: familiesModalOpen,
-	});
+    });
 
     const [memberListType, setMemberListType] = useState('');
     const closeMembersList = () => setMemberListType('');
@@ -282,47 +277,7 @@ const Profile = ({
                 onClose={onClose}
                 maxWidth={320}
             >
-                <Box
-                    display="flex"
-                    alignItems="center"
-                    gap={1}
-                    mb={1}
-                >
-                    <Avatar
-                        src={image ?? (gender === 'male'
-                            ? '/members/images/default-male.png'
-                            : '/members/images/default-female.png'
-                        )}
-                    />
-
-                    <Box>
-                        <Typography level="title-lg">
-                            {`${name}`}
-                        </Typography>
-
-                        <Typography
-                            textColor="text.tertiary"
-                            fontSize="small"
-                            fontWeight="lg"
-                        >
-                            {`#${_id}`}
-                        </Typography>
-
-                        <Typography
-                            textColor="text.tertiary"
-                            fontSize="small"
-                        >
-                            {gender[0].toUpperCase() + gender.slice(1)}
-                            {dob && ` | 🎂 ${formateDate(dob)} (${getAge(dob)} years)`}
-                        </Typography>
-                    </Box>
-                </Box>
-
-                {dod && (
-                    <Typography textColor="text.tertiary">
-                        Died on {formateDate(dod)} 💐
-                    </Typography>
-                )}
+                <BasicProfileInfo {...member} />
 
                 {spouse && (
 
@@ -339,44 +294,13 @@ const Profile = ({
                             💑
                         </Typography>
 
-                        <Box
-                            display="flex"
-                            alignItems="center"
-                            gap={1}
-                        >
-                            <Avatar
-                                src={spouse.image ?? (spouse.gender === 'male'
-                                    ? '/members/images/default-male.png'
-                                    : '/members/images/default-female.png'
-                                )}
-                                onClick={() => setMemberId(spouse._id)}
-                                sx={{ cursor: 'pointer' }}
-                            />
-
-                            <Box>
-                                <Typography fontWeight="lg">
-                                    {spouse.name}
-                                </Typography>
-
-                                <Typography
-                                    textColor="text.tertiary"
-                                    fontSize="small"
-                                    fontWeight="lg"
-                                >
-                                    {`#${spouse._id}`}
-                                </Typography>
-
-                                <Typography
-                                    textColor="text.tertiary"
-                                    fontSize="small"
-                                >
-                                    {spouse.gender[0].toUpperCase() + spouse.gender.slice(1)}
-                                    {dob && ` | 🎂 ${formateDate(spouse.dob)} (${getAge(spouse.dob)} years)`}
-                                    {/* | 🎂 { formateDate(spouse.dob) }
-                                    {' '}({ getAge(spouse.dob) } years) */}
-                                </Typography>
-                            </Box>
-                        </Box>
+                        <BasicProfileInfo
+                            {...spouse}
+                            avatarProps={{
+                                onClick: () => setMemberId(spouse._id),
+                                sx: { cursor: 'pointer' },
+                            }}
+                        />
                     </Box>
                 )}
 
@@ -500,14 +424,14 @@ const Profile = ({
                     loadingPosition="start"
                     fullWidth
                 >
-                    Show All Families
+                    Show All Ancestral Families
                 </Button>
             </Modal>
 
             {families && (
                 <Workspace
                     workspace={{
-                        name: `${member.name}'s`,
+                        name: `${member.name.split(' ')[0]}'s Ancestral`,
                         families,
                     }}
                     open={!isFamiliesFetching && familiesModalOpen}
