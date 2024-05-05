@@ -16,7 +16,7 @@
 const settings = {
     avatarSize: 50,
     treeProps: {
-        orientation: 'horizontal',
+        orientation: 'vertical',
         collapsible: false,
         draggable: true,
         zoomable: true,

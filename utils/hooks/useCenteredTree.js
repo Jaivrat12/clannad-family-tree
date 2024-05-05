@@ -12,7 +12,8 @@ const useCenteredTree = (defaultTranslate = { x: 0, y: 0 }) => {
 			// console.log({ width, height });
 			setDimensions({ width, height });
 			// setTranslate({ x: width / 2, y: height / 2 });
-			setTranslate({ x: 100, y: height / 2 });
+			// setTranslate({ x: 100, y: height / 2 });
+			setTranslate({ x: width / 2, y: 100 });
 		}
 	}, []);
 	return [dimensions, translate, containerRef];
